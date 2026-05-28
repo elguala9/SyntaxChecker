@@ -1,0 +1,9 @@
+# Daily snapshot for the alpine station
+station:
+  id: WS-204
+  altitude_m: 2870
+readings:
+  - temp_c: -3.4
+    humidity: 78
+  - temp_c: 1.1
+    humidity: 64
