@@ -24,7 +24,7 @@ SyntaxChecker/
 │   ├── checker/       # CLI: dist/checker(.exe)
 │   └── mcp-server/    # MCP server: dist/syntaxchecker-mcp(.exe)
 ├── pkg/result/        # Shared types (CheckResult, SyntaxError)
-├── test-samples/      # Valid and invalid sample files
+├── test-samples/      # Valid and invalid sample files (incl. schema/ for JSON Schema)
 ├── scripts/           # check-samples.ps1 (end-to-end tests)
 └── Makefile
 ```
@@ -63,15 +63,29 @@ Exit codes: `0` valid, `1` syntax errors, `2` internal error / file not found.
 ### Schema validation
 
 `--schema` validates the document against a [JSON Schema](https://json-schema.org/)
-(draft 2020-12 via `santhosh-tekuri/jsonschema`). It is supported for `json` and
-`yaml` (YAML maps onto the same data model as JSON). Schema violations are
-reported by their instance location (a JSON pointer such as `/items/0/name`)
-rather than a source line, since validation runs on the decoded value.
+(drafts up to 2020-12, including draft-07, via `santhosh-tekuri/jsonschema`). It
+is supported for `json` and `yaml` (YAML maps onto the same data model as JSON).
+Schema violations are reported by their instance location (a JSON pointer such
+as `/items/0/name`) rather than a source line, since validation runs on the
+decoded value.
+
+`format` keywords (e.g. `email`, `date`) are treated as annotations only, per
+the JSON Schema 2020-12 default — they do not cause validation failures.
+Structural keywords (`type`, `required`, `enum`, `const`, `pattern`,
+`minimum`/`maximum`, `minItems`, `uniqueItems`, `additionalProperties`,
+`oneOf`/`anyOf`, `$ref`, …) are fully enforced.
 
 XSD validation for XML is **not supported**: there is no mature pure-Go XSD
 validator, and the only production-grade option (cgo + libxml2) would require a
 native library, breaking the self-contained static binary. Requesting `--schema`
 for an XML file returns an error.
+
+Sample schemas and documents (valid and invalid) live under
+[`test-samples/schema/`](test-samples/schema). Each document `<topic>.<variant>.<ext>`
+is paired with its sibling `<topic>.schema.json`; files whose name contains
+`_not_correct` are expected to fail. They are exercised by the Go test
+`apps/checker/checkers/schema_samples_test.go` and end-to-end by
+`scripts/check-samples.ps1`.
 
 ## MCP usage
 
@@ -104,4 +118,6 @@ This is negligible for interactive use; for high throughput the MCP server could
 
 ## Status
 
-Phase 1 (CLI) and Phase 2 (MCP server) completed. Out-of-scope backlog: TOML, CSV, INI, ENV, HTML, Dockerfile, XHTML.
+Phase 1 (CLI) and Phase 2 (MCP server) completed, plus JSON Schema validation
+for JSON and YAML. Out-of-scope backlog: XSD for XML, assertive `format`
+validation, TOML, CSV, INI, ENV, HTML, Dockerfile, XHTML.
