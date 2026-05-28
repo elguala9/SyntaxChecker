@@ -9,7 +9,12 @@ import (
 )
 
 // XML validates XML well-formedness using the standard library. It does NOT
-// validate against a DTD/XSD: encoding/xml is a parser, not a schema validator.
+// validate against a DTD/XSD and deliberately does not implement
+// SchemaValidator: there is no mature pure-Go XSD validator, and the only
+// production-grade option (cgo + libxml2) would require a native library at
+// build and run time, breaking the self-contained static binary and its
+// Windows installer. Requesting a schema for XML therefore yields a clear
+// "schema validation is not supported" error from the CLI.
 type XML struct{}
 
 func (XML) Check(data []byte, strict bool) []result.SyntaxError {

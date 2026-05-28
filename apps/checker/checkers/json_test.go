@@ -50,3 +50,49 @@ func TestJSONArrayElementsNotKeys(t *testing.T) {
 		t.Fatalf("array string elements wrongly flagged: %v", errs)
 	}
 }
+
+const jsonSchema = `{
+  "type": "object",
+  "required": ["name", "age"],
+  "properties": {
+    "name": {"type": "string"},
+    "age": {"type": "integer", "minimum": 0}
+  }
+}`
+
+func TestJSONSchemaValid(t *testing.T) {
+	errs := JSON{}.CheckSchema([]byte(`{"name":"demo","age":30}`), []byte(jsonSchema), false)
+	if len(errs) != 0 {
+		t.Fatalf("expected conforming document, got %v", errs)
+	}
+}
+
+func TestJSONSchemaViolations(t *testing.T) {
+	// Wrong type for name, negative age: two violations.
+	errs := JSON{}.CheckSchema([]byte(`{"name":123,"age":-5}`), []byte(jsonSchema), false)
+	if len(errs) != 2 {
+		t.Fatalf("expected 2 schema violations, got %d: %v", len(errs), errs)
+	}
+}
+
+func TestJSONSchemaMissingRequired(t *testing.T) {
+	errs := JSON{}.CheckSchema([]byte(`{"name":"demo"}`), []byte(jsonSchema), false)
+	if len(errs) == 0 {
+		t.Fatal("expected a violation for missing required property")
+	}
+}
+
+func TestJSONSchemaMalformedDocument(t *testing.T) {
+	// A malformed document is reported before schema validation runs.
+	errs := JSON{}.CheckSchema([]byte(`{"name":`), []byte(jsonSchema), false)
+	if len(errs) != 1 {
+		t.Fatalf("expected 1 syntax error, got %d: %v", len(errs), errs)
+	}
+}
+
+func TestJSONSchemaInvalidSchema(t *testing.T) {
+	errs := JSON{}.CheckSchema([]byte(`{"name":"demo","age":30}`), []byte(`{not valid json`), false)
+	if len(errs) != 1 {
+		t.Fatalf("expected 1 error for invalid schema, got %d: %v", len(errs), errs)
+	}
+}

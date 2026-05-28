@@ -13,9 +13,12 @@ USE `check_syntax` when:
 - You have just written or edited a JSON/XML/YAML/SQL file and want to verify it before considering the task complete.
 - You are debugging a parsing error in one of these formats.
 
+USE `check_syntax` with `schema` when:
+- You need to validate a JSON or YAML file against a JSON Schema (structure, required fields, types, constraints) — pass the schema's path in `schema`.
+
 DO NOT use it for:
 - Semantic validation (e.g. "does this SQL do the right thing?") — the tool checks syntax only.
-- Schema validation (XSD, JSON Schema, etc.) — not supported.
+- XSD validation for XML — not supported (only JSON/YAML support schema validation).
 - Languages not listed (Python, Go, TS, etc.).
 
 ## Installation
@@ -98,7 +101,7 @@ Expected: `{"valid": true, ...}`.
 ### Signature
 
 ```
-check_syntax(file_path: string, type?: string, strict?: boolean)
+check_syntax(file_path: string, type?: string, schema?: string, strict?: boolean)
 ```
 
 ### Parameters
@@ -107,6 +110,7 @@ check_syntax(file_path: string, type?: string, strict?: boolean)
 - **`type`** (optional) — forces the type. If omitted, the checker auto-detects from the extension (`.json`, `.xml`, `.yml`/`.yaml`, `.sql`).
   - **Important for `.sql`**: auto-detect does NOT know which dialect to use. For SQL files **you must always pass `type`** with the correct dialect, otherwise the checker fails or uses an unwanted default.
   - Valid values: `json`, `xml`, `yaml`, `sql:mysql`, `sql:postgres` (alias `sql:postgresql`), `sql:ansi`, `sql:sqlite`, `sql:mssql` (alias `sql:tsql`), `sql:oracle` (alias `sql:plsql`).
+- **`schema`** (optional) — path to a JSON Schema (draft 2020-12) to validate the document against. Supported for `json` and `yaml` only. Passing it for an XML file returns an error (XSD validation is not supported). Violations are reported by instance location (a JSON pointer like `/items/0/name`), not by source line.
 - **`strict`** (optional, bool) — enables stricter checks. Known effect:
   - JSON: detects duplicate keys (otherwise silently ignored by the standard parser).
   - Other formats: no effect for now, but passing `true` is harmless.
@@ -116,9 +120,11 @@ check_syntax(file_path: string, type?: string, strict?: boolean)
 ```
 check_syntax(file_path="/abs/path/config.json")
 check_syntax(file_path="/abs/path/config.json", strict=true)
+check_syntax(file_path="/abs/path/config.json", schema="/abs/path/schema.json")
 check_syntax(file_path="/abs/path/query.sql", type="sql:mysql")
 check_syntax(file_path="/abs/path/migration.sql", type="sql:postgres")
 check_syntax(file_path="/abs/path/deploy.yaml")
+check_syntax(file_path="/abs/path/deploy.yaml", schema="/abs/path/schema.json")
 ```
 
 ### Response
@@ -159,5 +165,6 @@ Structured content with this shape:
 - Always pass **absolute paths**.
 - For SQL, always pass an **explicit `type`**.
 - For JSON with sensitive configuration (e.g. config keys that must not repeat), pass **`strict=true`**.
+- When the user has a JSON Schema (or asks to validate structure/required fields, not just syntax) for a JSON/YAML file, pass **`schema`** with its path.
 - After generating a file for the user, validate before delivering. If invalid, fix and re-validate — do not hand over a broken file.
 - Do not call the tool on large binary or non-textual files: respond sensibly.

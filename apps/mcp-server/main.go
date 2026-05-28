@@ -24,6 +24,7 @@ import (
 type CheckInput struct {
 	FilePath string `json:"file_path" jsonschema:"path of the file to check (absolute, or relative to the server's working directory)"`
 	Type     string `json:"type,omitempty" jsonschema:"forced type: json, xml, yaml, sql:mysql, sql:postgres, sql:ansi, sql:sqlite, sql:mssql, sql:oracle; empty means auto-detect from the extension"`
+	Schema   string `json:"schema,omitempty" jsonschema:"path of a JSON Schema to validate the document against; supported for json and yaml only"`
 	Strict   bool   `json:"strict,omitempty" jsonschema:"enable stricter checks where supported (e.g. JSON duplicate keys)"`
 }
 
@@ -38,7 +39,7 @@ func main() {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "check_syntax",
-		Description: "Validate the syntax of a file (JSON, XML, YAML, or SQL). Returns whether the file is valid and the list of syntax errors with line/column when available.",
+		Description: "Validate the syntax of a file (JSON, XML, YAML, or SQL). Optionally validate JSON or YAML against a JSON Schema by passing the 'schema' path. Returns whether the file is valid and the list of syntax errors with line/column when available.",
 	}, checkSyntax)
 
 	// stdin EOF (client disconnect) is a normal shutdown, not a failure.
@@ -55,6 +56,9 @@ func checkSyntax(ctx context.Context, _ *mcp.CallToolRequest, in CheckInput) (*m
 	args := []string{"-f", in.FilePath, "-o", "json"}
 	if in.Type != "" {
 		args = append(args, "-t", in.Type)
+	}
+	if in.Schema != "" {
+		args = append(args, "-s", in.Schema)
 	}
 	if in.Strict {
 		args = append(args, "--strict")
