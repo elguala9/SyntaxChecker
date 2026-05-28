@@ -1,0 +1,12 @@
+{
+  "name": "syntaxchecker",
+  "version": 1,
+  "nested": {
+    "a": [1, 2, 3],
+    "b": true
+  },
+  "list": [
+    {"id": 1},
+    {"id": 2}
+  ]
+}

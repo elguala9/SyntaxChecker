@@ -1,0 +1,24 @@
+# Build output
+/dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go
+*.test
+*.out
+vendor/
+go.work.sum
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+.speedy
+
+# Logs / temp
+*.log
+tmp/

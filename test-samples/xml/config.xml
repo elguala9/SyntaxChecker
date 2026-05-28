@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appSettings>
+    <add key="timeout" value="30" />
+    <add key="retries" value="3" />
+  </appSettings>
+  <connectionStrings>
+    <add name="default" value="server=localhost;db=app" />
+  </connectionStrings>
+</configuration>

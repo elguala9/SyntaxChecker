@@ -1,0 +1,4 @@
+{
+  "a": 1, // comments are not allowed in JSON
+  "b": 2
+}

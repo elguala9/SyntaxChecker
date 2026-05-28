@@ -1,0 +1,11 @@
+{
+  "config": {
+    "timeout": 10,
+    "retries": 3,
+    "timeout": 20
+  },
+  "name": "svc",
+  "list": [
+    {"k": 1, "k": 2}
+  ]
+}

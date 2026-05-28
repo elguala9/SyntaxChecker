@@ -1,0 +1,8 @@
+{
+  "empty_object": {},
+  "empty_array": [],
+  "empty_string": "",
+  "zero": 0,
+  "null_value": null,
+  "nested_empties": {"a": {}, "b": [], "c": [[], {}]}
+}

@@ -1,0 +1,136 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag/version (e.g. v1.2.3)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ''
+            archive: tar.gz
+          - os: windows-latest
+            goos: windows
+            goarch: amd64
+            ext: '.exe'
+            archive: zip
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+          cache-dependency-path: |
+            apps/checker/go.sum
+            apps/mcp-server/go.sum
+            pkg/result/go.sum
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.tag }}"
+          else
+            VERSION="${GITHUB_REF_NAME}"
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "builddate=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Build binaries
+        shell: bash
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: '0'
+          VERSION: ${{ steps.version.outputs.version }}
+          COMMIT: ${{ github.sha }}
+          BUILDDATE: ${{ steps.version.outputs.builddate }}
+        run: |
+          mkdir -p dist
+          LDFLAGS="-s -w -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.buildDate=${BUILDDATE}"
+          (cd apps/checker && go build -trimpath -ldflags "$LDFLAGS" -o "../../dist/checker${{ matrix.ext }}" .)
+          (cd apps/mcp-server && go build -trimpath -ldflags "-s -w" -o "../../dist/mcp-server${{ matrix.ext }}" .)
+
+      - name: Package archive
+        id: pkg
+        shell: bash
+        run: |
+          NAME="syntaxchecker-${{ steps.version.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}"
+          mkdir -p "pkg-out/${NAME}"
+          cp dist/checker${{ matrix.ext }} dist/mcp-server${{ matrix.ext }} "pkg-out/${NAME}/"
+          cp README.md "pkg-out/${NAME}/" 2>/dev/null || true
+          cd pkg-out
+          if [ "${{ matrix.archive }}" = "zip" ]; then
+            7z a -tzip "${NAME}.zip" "${NAME}" >/dev/null
+            echo "asset=pkg-out/${NAME}.zip" >> "$GITHUB_OUTPUT"
+          else
+            tar -czf "${NAME}.tar.gz" "${NAME}"
+            echo "asset=pkg-out/${NAME}.tar.gz" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute checksum
+        shell: bash
+        run: |
+          cd pkg-out
+          FILE=$(basename "${{ steps.pkg.outputs.asset }}")
+          if command -v sha256sum >/dev/null; then
+            sha256sum "$FILE" > "${FILE}.sha256"
+          else
+            certutil -hashfile "$FILE" SHA256 | sed -n '2p' | awk -v f="$FILE" '{print $0"  "f}' > "${FILE}.sha256"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            pkg-out/*.zip
+            pkg-out/*.tar.gz
+            pkg-out/*.sha256
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "name=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: ${{ steps.tag.outputs.name }}
+          generate_release_notes: true
+          files: |
+            artifacts/*.zip
+            artifacts/*.tar.gz
+            artifacts/*.sha256

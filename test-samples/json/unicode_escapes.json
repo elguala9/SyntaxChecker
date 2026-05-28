@@ -1,0 +1,8 @@
+{
+  "accented": "caffè",
+  "tab": "col1\tcol2",
+  "newline": "line1\nline2",
+  "quote": "she said \"hi\"",
+  "slash": "a\/b",
+  "unicode_name": "日本語"
+}
