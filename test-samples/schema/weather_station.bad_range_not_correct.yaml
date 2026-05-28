@@ -1,0 +1,7 @@
+# altitude over the cap, a non-numeric temperature and humidity above 100
+station:
+  id: WS-204
+  altitude_m: 12000
+readings:
+  - temp_c: hot
+    humidity: 142

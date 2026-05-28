@@ -33,6 +33,33 @@ func (JSON) Check(data []byte, strict bool) []result.SyntaxError {
 	return duplicateKeys(data)
 }
 
+// CheckSchema validates JSON well-formedness and then validates the document
+// against the given JSON Schema. With strict=true it additionally reports
+// duplicate object keys, as Check does.
+func (JSON) CheckSchema(data, schema []byte, strict bool) []result.SyntaxError {
+	var inst any
+	if err := json.Unmarshal(data, &inst); err != nil {
+		var se *json.SyntaxError
+		if errors.As(err, &se) {
+			line, col := result.OffsetToLineCol(data, int(se.Offset))
+			return []result.SyntaxError{{Line: line, Column: col, Message: se.Error()}}
+		}
+		return []result.SyntaxError{{Message: err.Error()}}
+	}
+
+	sch, err := compileSchema(schema)
+	if err != nil {
+		return []result.SyntaxError{{Message: err.Error()}}
+	}
+
+	var errs []result.SyntaxError
+	if strict {
+		errs = append(errs, duplicateKeys(data)...)
+	}
+	errs = append(errs, validateAgainstSchema(sch, inst)...)
+	return errs
+}
+
 // container tracks one open JSON object or array while streaming tokens.
 type container struct {
 	isObject bool
