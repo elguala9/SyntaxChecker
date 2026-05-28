@@ -1,10 +1,10 @@
 # Build dell'installer Windows
 
-L'installer è basato su **Inno Setup** (script `installer.iss` nella root del repo) e produce `dist\setup.exe`.
+L'installer è basato su **Inno Setup** (script `installer.iss` nella root del repo) e produce `dist\SyntaxChecker-Setup.exe`.
 
 Contenuto installato:
 
-- `checker.exe` e `syntaxchecker-mcp.exe` nella cartella di installazione (default: `%LOCALAPPDATA%\Programs\SyntaxChecker`)
+- `syntax-checker.exe` e `syntaxchecker-mcp.exe` nella cartella di installazione (default: `%LOCALAPPDATA%\Programs\SyntaxChecker`)
 - `for-ia.md` e `for-agent.md` nella sottocartella `docs\`
 - Voce di disinstallazione in *App e funzionalità*
 - (Opzionale, task spuntabile in setup) aggiunta della cartella di installazione al `PATH` utente
@@ -38,8 +38,8 @@ make installer
 
 Cosa fa:
 
-1. Lancia `make build-windows` → builda `dist\checker.exe` e `dist\syntaxchecker-mcp.exe` per `windows/amd64`.
-2. Lancia `iscc /DMyAppVersion=<git-version> installer.iss` → produce `dist\setup.exe`.
+1. Lancia `make build-windows` → builda `dist\syntax-checker.exe` e `dist\syntaxchecker-mcp.exe` per `windows/amd64`.
+2. Lancia `iscc /DMyAppVersion=<git-version> installer.iss` → produce `dist\SyntaxChecker-Setup.exe`.
 
 La versione viene presa da `git describe --tags --always` (fallback `dev`). Per forzarla:
 
@@ -57,7 +57,7 @@ make installer ISCC="C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
 
 ```powershell
 # 1) build dei due exe per Windows
-cd apps\checker     ; go build -trimpath -ldflags "-s -w" -o ..\..\dist\checker.exe .
+cd apps\checker     ; go build -trimpath -ldflags "-s -w" -o ..\..\dist\syntax-checker.exe .
 cd ..\mcp-server    ; go build -trimpath -ldflags "-s -w" -o ..\..\dist\syntaxchecker-mcp.exe .
 cd ..\..
 
@@ -65,15 +65,15 @@ cd ..\..
 & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=1.2.3 installer.iss
 ```
 
-Output: `dist\setup.exe`.
+Output: `dist\SyntaxChecker-Setup.exe`.
 
 ## Test rapido
 
-1. Esegui `dist\setup.exe` su una macchina Windows pulita (o in una VM).
+1. Esegui `dist\SyntaxChecker-Setup.exe` su una macchina Windows pulita (o in una VM).
 2. Conferma:
-   - I file `checker.exe`, `syntaxchecker-mcp.exe` sono in `{app}`.
+   - I file `syntax-checker.exe`, `syntaxchecker-mcp.exe` sono in `{app}`.
    - `docs\for-ia.md` e `docs\for-agent.md` sono in `{app}\docs`.
-   - Se hai spuntato *"Aggiungi la cartella di installazione al PATH utente"*: apri una **nuova** PowerShell e verifica `where.exe checker` e `where.exe syntaxchecker-mcp`.
+   - Se hai spuntato *"Aggiungi la cartella di installazione al PATH utente"*: apri una **nuova** PowerShell e verifica `where.exe syntax-checker` e `where.exe syntaxchecker-mcp`.
 3. Disinstalla da *App e funzionalità*: la cartella `{app}` viene rimossa e l'entry nel `PATH` utente viene ripulita.
 
 ## Note

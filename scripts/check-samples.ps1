@@ -11,10 +11,10 @@
 
 .EXAMPLE
   pwsh scripts/check-samples.ps1
-  pwsh scripts/check-samples.ps1 -Exe dist/checker.exe -SamplesDir test-samples
+  pwsh scripts/check-samples.ps1 -Exe dist/syntax-checker.exe -SamplesDir test-samples
 #>
 param(
-  [string]$Exe        = "$PSScriptRoot\..\dist\checker.exe",
+  [string]$Exe        = "$PSScriptRoot\..\dist\syntax-checker.exe",
   [string]$SamplesDir = "$PSScriptRoot\..\test-samples"
 )
 

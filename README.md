@@ -1,6 +1,6 @@
 # SyntaxChecker
 
-Multi-format syntax validator, shipped as a CLI (`checker`) and as an MCP server (`syntaxchecker-mcp`) for integration with AI assistants (Claude Desktop, VS Code MCP, etc.).
+Multi-format syntax validator, shipped as a CLI (`syntax-checker`) and as an MCP server (`syntaxchecker-mcp`) for integration with AI assistants (Claude Desktop, VS Code MCP, etc.).
 
 ## Supported formats
 
@@ -21,7 +21,7 @@ Multi-format syntax validator, shipped as a CLI (`checker`) and as an MCP server
 ```
 SyntaxChecker/
 ├── apps/
-│   ├── checker/       # CLI: dist/checker(.exe)
+│   ├── checker/       # CLI: dist/syntax-checker(.exe)
 │   └── mcp-server/    # MCP server: dist/syntaxchecker-mcp(.exe)
 ├── pkg/result/        # Shared types (CheckResult, SyntaxError)
 ├── test-samples/      # Valid and invalid sample files (incl. schema/ for JSON Schema)
@@ -34,7 +34,7 @@ SyntaxChecker/
 Requires Go 1.22+ (workspace already configured in `go.work`).
 
 ```bash
-make build           # produces dist/checker(.exe) and dist/syntaxchecker-mcp(.exe)
+make build           # produces dist/syntax-checker(.exe) and dist/syntaxchecker-mcp(.exe)
 make test            # runs the unit tests
 make build-windows   # cross-build for Windows
 make build-linux     # cross-build for Linux
@@ -45,17 +45,17 @@ Binaries built with `CGO_ENABLED=0`, `-trimpath`, `-ldflags "-s -w"`.
 ## CLI usage
 
 ```bash
-checker --file <path> [--type <type>] [--schema <path>] [--format text|json|json-pretty] [--strict] [--quiet]
+syntax-checker --file <path> [--type <type>] [--schema <path>] [--format text|json|json-pretty] [--strict] [--quiet]
 ```
 
 Examples:
 
 ```bash
-checker -f config.json
-checker -f query.sql -t sql:mysql
-checker -f data.json --strict -o json-pretty
-checker -f data.json --schema schema.json     # validate JSON against a JSON Schema
-checker -f config.yaml --schema schema.json    # validate YAML against a JSON Schema
+syntax-checker -f config.json
+syntax-checker -f query.sql -t sql:mysql
+syntax-checker -f data.json --strict -o json-pretty
+syntax-checker -f data.json --schema schema.json     # validate JSON against a JSON Schema
+syntax-checker -f config.yaml --schema schema.json    # validate YAML against a JSON Schema
 ```
 
 Exit codes: `0` valid, `1` syntax errors, `2` internal error / file not found.
@@ -100,7 +100,7 @@ See [`apps/mcp-server/README.md`](apps/mcp-server/README.md) for details and [`f
   "mcpServers": {
     "syntaxchecker": {
       "command": "C:\\path\\to\\dist\\syntaxchecker-mcp.exe",
-      "env": { "CHECKER_BIN": "C:\\path\\to\\dist\\checker.exe" }
+      "env": { "CHECKER_BIN": "C:\\path\\to\\dist\\syntax-checker.exe" }
     }
   }
 }

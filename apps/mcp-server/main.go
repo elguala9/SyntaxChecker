@@ -1,5 +1,5 @@
 // Command syntaxchecker-mcp exposes the syntax checker as an MCP tool. It invokes the
-// `checker` executable as a subprocess and returns its JSON result.
+// `syntax-checker` executable as a subprocess and returns its JSON result.
 package main
 
 import (
@@ -102,9 +102,9 @@ func resolveCheckerBin() string {
 	if v := os.Getenv("CHECKER_BIN"); v != "" {
 		return v
 	}
-	name := "checker"
+	name := "syntax-checker"
 	if runtime.GOOS == "windows" {
-		name = "checker.exe"
+		name = "syntax-checker.exe"
 	}
 	if exe, err := os.Executable(); err == nil {
 		cand := filepath.Join(filepath.Dir(exe), name)
