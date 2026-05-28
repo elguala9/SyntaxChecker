@@ -8,6 +8,7 @@ require (
 	github.com/parresia/syntaxchecker/pkg/result v0.0.0
 	github.com/pingcap/tidb/pkg/parser v0.0.0-20260527114842-beb12a7923d3
 	github.com/rqlite/sql v0.0.0-20260224021119-1b2524a41372
+	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 	github.com/wasilibs/go-pgquery v0.0.0-20260526011917-40df1ddb6e56
 	gopkg.in/yaml.v3 v3.0.1
 )

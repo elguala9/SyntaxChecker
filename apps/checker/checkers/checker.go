@@ -16,6 +16,17 @@ type Validator interface {
 	Check(data []byte, strict bool) []result.SyntaxError
 }
 
+// SchemaValidator is implemented by validators that can additionally validate a
+// document against a schema (e.g. JSON Schema, XSD). It is an optional
+// capability: main.go type-asserts a Validator to this interface and reports a
+// clear error when a schema is requested for a type that does not support one.
+type SchemaValidator interface {
+	// CheckSchema validates data for well-formedness first and then against the
+	// given schema. The returned slice is empty when the input is both
+	// well-formed and conforms to the schema.
+	CheckSchema(data, schema []byte, strict bool) []result.SyntaxError
+}
+
 // maxMessageLen caps a parser message length (in runes).
 const maxMessageLen = 200
 

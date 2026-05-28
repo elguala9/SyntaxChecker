@@ -41,6 +41,7 @@ func run() int {
 		file    string
 		typ     string
 		format  string
+		schema  string
 		strict  bool
 		quiet   bool
 		showVer bool
@@ -51,6 +52,8 @@ func run() int {
 	flag.StringVar(&typ, "t", "", "shorthand for --type")
 	flag.StringVar(&format, "format", "text", "output format: text | json | json-pretty")
 	flag.StringVar(&format, "o", "text", "shorthand for --format")
+	flag.StringVar(&schema, "schema", "", "path of a JSON Schema to validate against (json, yaml)")
+	flag.StringVar(&schema, "s", "", "shorthand for --schema")
 	flag.BoolVar(&strict, "strict", false, "enable stricter checks where supported")
 	flag.BoolVar(&quiet, "quiet", false, "no output, exit code only")
 	flag.BoolVar(&showVer, "version", false, "print version and exit")
@@ -92,7 +95,22 @@ func run() int {
 		fmt.Fprintln(os.Stderr, "warning: validated using PostgreSQL grammar (closest to ANSI standard)")
 	}
 
-	errs := v.Check(data, strict)
+	var errs []result.SyntaxError
+	if schema != "" {
+		sv, ok := v.(checkers.SchemaValidator)
+		if !ok {
+			fmt.Fprintf(os.Stderr, "error: schema validation is not supported for type %q\n", typ)
+			return exitInternal
+		}
+		schemaData, err := os.ReadFile(schema)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: cannot read schema: %v\n", err)
+			return exitInternal
+		}
+		errs = sv.CheckSchema(data, schemaData, strict)
+	} else {
+		errs = v.Check(data, strict)
+	}
 	res := result.CheckResult{
 		File:         file,
 		Type:         typ,
