@@ -60,6 +60,22 @@ Get-ChildItem -Path $SamplesDir -Recurse -File | Sort-Object FullName | ForEach-
 
   # Always use --strict so JSON duplicate keys count as errors.
   $cliArgs = @("-f", $file.FullName, "-t", $type, "--strict")
+
+  # Schema-validation samples live in test-samples/schema: a document
+  # "<topic>.<variant>.<ext>" is validated against its sibling
+  # "<topic>.schema.json" via --schema. The schema files themselves are
+  # only syntax-checked (plain JSON).
+  if (($file.Directory.Name -eq "schema") -and ($file.Name -notlike "*.schema.json")) {
+    $topic      = ($file.Name -split '\.')[0]
+    $schemaPath = Join-Path $file.DirectoryName "$topic.schema.json"
+    if (-not (Test-Path $schemaPath)) {
+      "  FAIL  {0,-45} (schema '{1}.schema.json' not found)" -f $rel, $topic
+      $fail++; $failures += $rel
+      return
+    }
+    $cliArgs += @("--schema", $schemaPath)
+  }
+
   $output  = & $Exe @cliArgs
   $code    = $LASTEXITCODE
 

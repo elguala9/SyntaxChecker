@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["title", "author", "tags"],
+  "properties": {
+    "title":     { "type": "string", "minLength": 3 },
+    "author":    { "$ref": "#/definitions/person" },
+    "tags":      { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "published": { "type": "boolean" }
+  },
+  "definitions": {
+    "person": {
+      "type": "object",
+      "required": ["name", "email"],
+      "properties": {
+        "name":  { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      }
+    }
+  }
+}
