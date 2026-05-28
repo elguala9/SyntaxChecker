@@ -9,7 +9,9 @@ LDFLAGS := -s -w \
 
 EXT := $(if $(filter windows,$(GOOS)),.exe,)
 
-.PHONY: build build-checker build-mcp build-linux build-windows test lint clean
+ISCC ?= iscc
+
+.PHONY: build build-checker build-mcp build-linux build-windows test lint clean installer
 
 build: build-checker build-mcp
 
@@ -17,7 +19,7 @@ build-checker:
 	cd apps/checker && CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o ../../dist/checker$(EXT) .
 
 build-mcp:
-	cd apps/mcp-server && CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o ../../dist/mcp-server$(EXT) .
+	cd apps/mcp-server && CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o ../../dist/syntaxchecker-mcp$(EXT) .
 
 build-windows:
 	$(MAKE) build GOOS=windows GOARCH=amd64
@@ -34,6 +36,9 @@ lint:
 	cd apps/checker && go vet ./...
 	cd apps/mcp-server && go vet ./...
 	cd pkg/result && go vet ./...
+
+installer: build-windows
+	$(ISCC) /DMyAppVersion=$(VERSION) installer.iss
 
 clean:
 	rm -rf dist

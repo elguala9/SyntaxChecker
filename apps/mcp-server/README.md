@@ -17,7 +17,7 @@ output as structured content.
 ## Build
 
 ```
-make build        # produces dist/checker(.exe) and dist/mcp-server(.exe)
+make build        # produces dist/checker(.exe) and dist/syntaxchecker-mcp(.exe)
 ```
 
 ## Resolving the checker executable
@@ -25,7 +25,7 @@ make build        # produces dist/checker(.exe) and dist/mcp-server(.exe)
 The server looks for `checker` in this order:
 
 1. `CHECKER_BIN` environment variable;
-2. `checker`/`checker.exe` binary next to `mcp-server`;
+2. `checker`/`checker.exe` binary next to `syntaxchecker-mcp`;
 3. `checker` on `PATH`.
 
 ## Claude Desktop / VS Code config
@@ -34,14 +34,14 @@ The server looks for `checker` in this order:
 {
   "mcpServers": {
     "syntaxchecker": {
-      "command": "C:\\path\\to\\dist\\mcp-server.exe",
+      "command": "C:\\path\\to\\dist\\syntaxchecker-mcp.exe",
       "env": { "CHECKER_BIN": "C:\\path\\to\\dist\\checker.exe" }
     }
   }
 }
 ```
 
-If `checker.exe` is in the same folder as `mcp-server.exe`, `CHECKER_BIN` is optional.
+If `checker.exe` is in the same folder as `syntaxchecker-mcp.exe`, `CHECKER_BIN` is optional.
 
 ## Performance note
 

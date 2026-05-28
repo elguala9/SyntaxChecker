@@ -1,4 +1,4 @@
-// Command mcp-server exposes the syntax checker as an MCP tool. It invokes the
+// Command syntaxchecker-mcp exposes the syntax checker as an MCP tool. It invokes the
 // `checker` executable as a subprocess and returns its JSON result.
 package main
 
@@ -43,7 +43,7 @@ func main() {
 
 	// stdin EOF (client disconnect) is a normal shutdown, not a failure.
 	if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
-		log.Printf("mcp-server stopped: %v", err)
+		log.Printf("syntaxchecker-mcp stopped: %v", err)
 	}
 }
 
