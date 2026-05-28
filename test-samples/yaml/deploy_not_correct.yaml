@@ -1,0 +1,9 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checker
+   labels:
+    app: checker
+spec:
+  replicas: 3
+  ports: [8080, 9090

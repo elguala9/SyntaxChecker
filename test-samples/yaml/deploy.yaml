@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checker
+  labels:
+    app: checker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: checker
+  template:
+    metadata:
+      labels:
+        app: checker
+    spec:
+      containers:
+        - name: checker
+          image: checker:latest
+          ports:
+            - containerPort: 8080

@@ -1,0 +1,10 @@
+{
+  "service": "syntaxchecker",
+  "port": 8080
+  "features": {
+    "strict": true,
+    "formats": ["json", "sql", "xml", "yaml",]
+  },
+  "limits": {
+    "maxFileSizeKb": 1024
+}
