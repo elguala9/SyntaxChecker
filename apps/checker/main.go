@@ -60,7 +60,7 @@ func run() int {
 	flag.Parse()
 
 	if showVer {
-		fmt.Printf("checker %s (commit %s, built %s)\n", version, commit, buildDate)
+		fmt.Printf("syntax-checker %s (commit %s, built %s)\n", version, commit, buildDate)
 		return exitOK
 	}
 

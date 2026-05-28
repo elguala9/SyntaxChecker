@@ -1,6 +1,6 @@
 ; SyntaxChecker - Inno Setup script
 ; Build: iscc installer.iss  (oppure: make installer)
-; Produces: dist\setup.exe
+; Produces: dist\SyntaxChecker-Setup.exe
 
 #define MyAppName        "SyntaxChecker"
 #define MyAppPublisher   "Parresia"
@@ -18,7 +18,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputDir=dist
-OutputBaseFilename=setup
+OutputBaseFilename=SyntaxChecker-Setup
 Compression=lzma2
 SolidCompression=yes
 ArchitecturesAllowed=x64compatible
@@ -37,7 +37,7 @@ Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 Name: "addtopath"; Description: "Aggiungi la cartella di installazione al PATH utente"; GroupDescription: "Integrazione sistema:"
 
 [Files]
-Source: "dist\checker.exe";     DestDir: "{app}"; Flags: ignoreversion
+Source: "dist\syntax-checker.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "dist\syntaxchecker-mcp.exe";  DestDir: "{app}"; Flags: ignoreversion
 Source: "for-ia.md";            DestDir: "{app}\docs"; Flags: ignoreversion
 Source: "for-agent.md";         DestDir: "{app}\docs"; Flags: ignoreversion

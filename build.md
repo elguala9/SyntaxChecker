@@ -1,6 +1,6 @@
 # Local build
 
-Instructions to compile the `checker` and `syntaxchecker-mcp` binaries into the `dist/` folder.
+Instructions to compile the `syntax-checker` and `syntaxchecker-mcp` binaries into the `dist/` folder.
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ make build
 ```
 
 Produces in `dist/`:
-- `checker` (or `checker.exe` on Windows)
+- `syntax-checker` (or `syntax-checker.exe` on Windows)
 - `syntaxchecker-mcp` (or `syntaxchecker-mcp.exe` on Windows)
 
 To build only one of them:
@@ -34,7 +34,7 @@ make build-mcp
 make build-windows
 ```
 
-Generates `dist/checker.exe` and `dist/syntaxchecker-mcp.exe` (target `windows/amd64`).
+Generates `dist/syntax-checker.exe` and `dist/syntaxchecker-mcp.exe` (target `windows/amd64`).
 
 ### Linux
 
@@ -42,7 +42,7 @@ Generates `dist/checker.exe` and `dist/syntaxchecker-mcp.exe` (target `windows/a
 make build-linux
 ```
 
-Generates `dist/checker` and `dist/syntaxchecker-mcp` (target `linux/amd64`).
+Generates `dist/syntax-checker` and `dist/syntaxchecker-mcp` (target `linux/amd64`).
 
 ## Manual build (without make)
 
@@ -61,7 +61,7 @@ $LDFLAGS = "-s -w -X main.version=$VERSION -X main.commit=$COMMIT -X main.buildD
 
 New-Item -ItemType Directory -Force dist | Out-Null
 Push-Location apps/checker
-go build -trimpath -ldflags "$LDFLAGS" -o ../../dist/checker.exe .
+go build -trimpath -ldflags "$LDFLAGS" -o ../../dist/syntax-checker.exe .
 Pop-Location
 Push-Location apps/mcp-server
 go build -trimpath -ldflags "-s -w" -o ../../dist/syntaxchecker-mcp.exe .
@@ -71,7 +71,7 @@ Pop-Location
 ## Verify
 
 ```bash
-./dist/checker --version
+./dist/syntax-checker --version
 ./dist/syntaxchecker-mcp --version
 ```
 

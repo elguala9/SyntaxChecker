@@ -16,7 +16,7 @@ ISCC ?= iscc
 build: build-checker build-mcp
 
 build-checker:
-	cd apps/checker && CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o ../../dist/checker$(EXT) .
+	cd apps/checker && CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o ../../dist/syntax-checker$(EXT) .
 
 build-mcp:
 	cd apps/mcp-server && CGO_ENABLED=0 go build -trimpath -ldflags "-s -w" -o ../../dist/syntaxchecker-mcp$(EXT) .
