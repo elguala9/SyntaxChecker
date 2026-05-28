@@ -1,0 +1,6 @@
+{
+  "title": "On Schemas",
+  "author": { "name": "Dana", "email": "dana@example.org" },
+  "tags": ["meta", "json"],
+  "published": true
+}

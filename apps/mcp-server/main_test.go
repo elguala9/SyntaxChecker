@@ -16,7 +16,7 @@ import (
 // checkerBinForTest returns the absolute path to the built checker, skipping the
 // test when it has not been built yet.
 func checkerBinForTest(t *testing.T) string {
-	abs, err := filepath.Abs(filepath.Join("..", "..", "dist", "checker.exe"))
+	abs, err := filepath.Abs(filepath.Join("..", "..", "dist", "syntax-checker.exe"))
 	if err != nil {
 		t.Fatal(err)
 	}

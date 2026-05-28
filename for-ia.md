@@ -13,9 +13,12 @@ USE `check_syntax` when:
 - You have just written or edited a JSON/XML/YAML/SQL file and want to verify it before considering the task complete.
 - You are debugging a parsing error in one of these formats.
 
+USE `check_syntax` with `schema` when:
+- You need to validate a JSON or YAML file against a JSON Schema (structure, required fields, types, constraints) — pass the schema's path in `schema`.
+
 DO NOT use it for:
 - Semantic validation (e.g. "does this SQL do the right thing?") — the tool checks syntax only.
-- Schema validation (XSD, JSON Schema, etc.) — not supported.
+- XSD validation for XML — not supported (only JSON/YAML support schema validation).
 - Languages not listed (Python, Go, TS, etc.).
 
 ## Installation
@@ -29,13 +32,13 @@ make build
 ```
 
 Produces:
-- `dist/checker(.exe)` — validation CLI.
+- `dist/syntax-checker(.exe)` — validation CLI.
 - `dist/syntaxchecker-mcp(.exe)` — MCP server (stdio transport).
 
 If `make` is not available (Windows without make):
 
 ```
-cd apps/checker     && go build -o ../../dist/checker.exe .
+cd apps/checker     && go build -o ../../dist/syntax-checker.exe .
 cd apps/mcp-server  && go build -o ../../dist/syntaxchecker-mcp.exe .
 ```
 
@@ -50,13 +53,13 @@ File: `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Appl
   "mcpServers": {
     "syntaxchecker": {
       "command": "C:\\absolute\\path\\dist\\syntaxchecker-mcp.exe",
-      "env": { "CHECKER_BIN": "C:\\absolute\\path\\dist\\checker.exe" }
+      "env": { "CHECKER_BIN": "C:\\absolute\\path\\dist\\syntax-checker.exe" }
     }
   }
 }
 ```
 
-`CHECKER_BIN` is optional if both binaries live in the same folder: the server looks for `checker(.exe)` next to itself and then on `PATH`.
+`CHECKER_BIN` is optional if both binaries live in the same folder: the server looks for `syntax-checker(.exe)` next to itself and then on `PATH`.
 
 Restart the MCP client after editing the config.
 
@@ -74,7 +77,7 @@ File: `~/.config/opencode/opencode.json` (Linux/macOS) or `%APPDATA%\opencode\op
     "syntaxchecker": {
       "type": "local",
       "command": ["C:\\absolute\\path\\dist\\syntaxchecker-mcp.exe"],
-      "environment": { "CHECKER_BIN": "C:\\absolute\\path\\dist\\checker.exe" },
+      "environment": { "CHECKER_BIN": "C:\\absolute\\path\\dist\\syntax-checker.exe" },
       "enabled": true
     }
   }
@@ -98,7 +101,7 @@ Expected: `{"valid": true, ...}`.
 ### Signature
 
 ```
-check_syntax(file_path: string, type?: string, strict?: boolean)
+check_syntax(file_path: string, type?: string, schema?: string, strict?: boolean)
 ```
 
 ### Parameters
@@ -107,6 +110,8 @@ check_syntax(file_path: string, type?: string, strict?: boolean)
 - **`type`** (optional) — forces the type. If omitted, the checker auto-detects from the extension (`.json`, `.xml`, `.yml`/`.yaml`, `.sql`).
   - **Important for `.sql`**: auto-detect does NOT know which dialect to use. For SQL files **you must always pass `type`** with the correct dialect, otherwise the checker fails or uses an unwanted default.
   - Valid values: `json`, `xml`, `yaml`, `sql:mysql`, `sql:postgres` (alias `sql:postgresql`), `sql:ansi`, `sql:sqlite`, `sql:mssql` (alias `sql:tsql`), `sql:oracle` (alias `sql:plsql`).
+- **`schema`** (optional) — path to a JSON Schema (drafts up to 2020-12, including draft-07) to validate the document against. Supported for `json` and `yaml` only. Passing it for an XML file returns an error (XSD validation is not supported). Violations are reported by instance location (a JSON pointer like `/items/0/name`), not by source line.
+  - **`format` is annotation-only** (e.g. `email`, `date` are NOT enforced); structural keywords (`type`, `required`, `enum`, `pattern`, ranges, `oneOf`, `$ref`, …) ARE enforced. Do not assume a malformed email fails validation.
 - **`strict`** (optional, bool) — enables stricter checks. Known effect:
   - JSON: detects duplicate keys (otherwise silently ignored by the standard parser).
   - Other formats: no effect for now, but passing `true` is harmless.
@@ -116,9 +121,11 @@ check_syntax(file_path: string, type?: string, strict?: boolean)
 ```
 check_syntax(file_path="/abs/path/config.json")
 check_syntax(file_path="/abs/path/config.json", strict=true)
+check_syntax(file_path="/abs/path/config.json", schema="/abs/path/schema.json")
 check_syntax(file_path="/abs/path/query.sql", type="sql:mysql")
 check_syntax(file_path="/abs/path/migration.sql", type="sql:postgres")
 check_syntax(file_path="/abs/path/deploy.yaml")
+check_syntax(file_path="/abs/path/deploy.yaml", schema="/abs/path/schema.json")
 ```
 
 ### Response
@@ -150,7 +157,7 @@ Structured content with this shape:
 ## Common errors and troubleshooting
 
 - **Tool not available in the client**: the server did not start. Check the `command` path, restart the client, and make sure `syntaxchecker-mcp.exe` exists.
-- **"checker binary not found"**: the server cannot locate `checker(.exe)`. Set `CHECKER_BIN` or place it in the same folder as `syntaxchecker-mcp.exe`.
+- **"checker binary not found"**: the server cannot locate `syntax-checker(.exe)`. Set `CHECKER_BIN` or place it in the same folder as `syntaxchecker-mcp.exe`.
 - **All SQL validations fail in odd ways**: you probably omitted `type` and auto-detect picked an unsuitable dialect. Pass the explicit dialect.
 - **First `sql:postgres` call is slow (~700 ms)**: normal. That is the WASM module init, once per process.
 
@@ -159,5 +166,6 @@ Structured content with this shape:
 - Always pass **absolute paths**.
 - For SQL, always pass an **explicit `type`**.
 - For JSON with sensitive configuration (e.g. config keys that must not repeat), pass **`strict=true`**.
+- When the user has a JSON Schema (or asks to validate structure/required fields, not just syntax) for a JSON/YAML file, pass **`schema`** with its path.
 - After generating a file for the user, validate before delivering. If invalid, fix and re-validate — do not hand over a broken file.
 - Do not call the tool on large binary or non-textual files: respond sensibly.

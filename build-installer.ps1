@@ -1,7 +1,7 @@
 #requires -Version 5.1
 <#
 .SYNOPSIS
-  Builda checker.exe + syntaxchecker-mcp.exe e produce dist\setup.exe via Inno Setup.
+  Builda syntax-checker.exe + syntaxchecker-mcp.exe e produce dist\SyntaxChecker-Setup.exe via Inno Setup.
 
 .EXAMPLE
   .\build-installer.ps1
@@ -58,9 +58,9 @@ if (-not $commit) { $commit = 'none' }
 $ldCheck = "-s -w -X main.version=$Version -X main.commit=$commit -X main.buildDate=$buildDate"
 $ldMcp   = "-s -w"
 
-Write-Host "==> build checker.exe"
+Write-Host "==> build syntax-checker.exe"
 Push-Location (Join-Path $root 'apps\checker')
-& go build -trimpath -ldflags $ldCheck -o (Join-Path $dist 'checker.exe') .
+& go build -trimpath -ldflags $ldCheck -o (Join-Path $dist 'syntax-checker.exe') .
 if ($LASTEXITCODE -ne 0) { Pop-Location; throw "go build checker fallita" }
 Pop-Location
 
@@ -75,4 +75,4 @@ Write-Host "==> compile installer.iss"
 if ($LASTEXITCODE -ne 0) { throw "iscc fallito" }
 
 Write-Host ""
-Write-Host "OK -> $(Join-Path $dist 'setup.exe')"
+Write-Host "OK -> $(Join-Path $dist 'SyntaxChecker-Setup.exe')"

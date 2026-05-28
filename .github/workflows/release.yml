@@ -66,7 +66,7 @@ jobs:
         run: |
           mkdir -p dist
           LDFLAGS="-s -w -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.buildDate=${BUILDDATE}"
-          (cd apps/checker && go build -trimpath -ldflags "$LDFLAGS" -o "../../dist/checker${{ matrix.ext }}" .)
+          (cd apps/checker && go build -trimpath -ldflags "$LDFLAGS" -o "../../dist/syntax-checker${{ matrix.ext }}" .)
           (cd apps/mcp-server && go build -trimpath -ldflags "-s -w" -o "../../dist/syntaxchecker-mcp${{ matrix.ext }}" .)
 
       - name: Package archive
@@ -75,7 +75,7 @@ jobs:
         run: |
           NAME="syntaxchecker-${{ steps.version.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}"
           mkdir -p "pkg-out/${NAME}"
-          cp dist/checker${{ matrix.ext }} dist/syntaxchecker-mcp${{ matrix.ext }} "pkg-out/${NAME}/"
+          cp dist/syntax-checker${{ matrix.ext }} dist/syntaxchecker-mcp${{ matrix.ext }} "pkg-out/${NAME}/"
           cp README.md "pkg-out/${NAME}/" 2>/dev/null || true
           cd pkg-out
           if [ "${{ matrix.archive }}" = "zip" ]; then
