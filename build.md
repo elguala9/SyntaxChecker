@@ -1,6 +1,6 @@
 # Local build
 
-Instructions to compile the `checker` and `mcp-server` binaries into the `dist/` folder.
+Instructions to compile the `checker` and `syntaxchecker-mcp` binaries into the `dist/` folder.
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ make build
 
 Produces in `dist/`:
 - `checker` (or `checker.exe` on Windows)
-- `mcp-server` (or `mcp-server.exe` on Windows)
+- `syntaxchecker-mcp` (or `syntaxchecker-mcp.exe` on Windows)
 
 To build only one of them:
 
@@ -34,7 +34,7 @@ make build-mcp
 make build-windows
 ```
 
-Generates `dist/checker.exe` and `dist/mcp-server.exe` (target `windows/amd64`).
+Generates `dist/checker.exe` and `dist/syntaxchecker-mcp.exe` (target `windows/amd64`).
 
 ### Linux
 
@@ -42,7 +42,7 @@ Generates `dist/checker.exe` and `dist/mcp-server.exe` (target `windows/amd64`).
 make build-linux
 ```
 
-Generates `dist/checker` and `dist/mcp-server` (target `linux/amd64`).
+Generates `dist/checker` and `dist/syntaxchecker-mcp` (target `linux/amd64`).
 
 ## Manual build (without make)
 
@@ -64,7 +64,7 @@ Push-Location apps/checker
 go build -trimpath -ldflags "$LDFLAGS" -o ../../dist/checker.exe .
 Pop-Location
 Push-Location apps/mcp-server
-go build -trimpath -ldflags "-s -w" -o ../../dist/mcp-server.exe .
+go build -trimpath -ldflags "-s -w" -o ../../dist/syntaxchecker-mcp.exe .
 Pop-Location
 ```
 
@@ -72,7 +72,7 @@ Pop-Location
 
 ```bash
 ./dist/checker --version
-./dist/mcp-server --version
+./dist/syntaxchecker-mcp --version
 ```
 
 ## Clean

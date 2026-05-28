@@ -1,6 +1,6 @@
 # SyntaxChecker
 
-Multi-format syntax validator, shipped as a CLI (`checker`) and as an MCP server (`mcp-server`) for integration with AI assistants (Claude Desktop, VS Code MCP, etc.).
+Multi-format syntax validator, shipped as a CLI (`checker`) and as an MCP server (`syntaxchecker-mcp`) for integration with AI assistants (Claude Desktop, VS Code MCP, etc.).
 
 ## Supported formats
 
@@ -22,7 +22,7 @@ Multi-format syntax validator, shipped as a CLI (`checker`) and as an MCP server
 SyntaxChecker/
 ├── apps/
 │   ├── checker/       # CLI: dist/checker(.exe)
-│   └── mcp-server/    # MCP server: dist/mcp-server(.exe)
+│   └── mcp-server/    # MCP server: dist/syntaxchecker-mcp(.exe)
 ├── pkg/result/        # Shared types (CheckResult, SyntaxError)
 ├── test-samples/      # Valid and invalid sample files
 ├── scripts/           # check-samples.ps1 (end-to-end tests)
@@ -34,7 +34,7 @@ SyntaxChecker/
 Requires Go 1.22+ (workspace already configured in `go.work`).
 
 ```bash
-make build           # produces dist/checker(.exe) and dist/mcp-server(.exe)
+make build           # produces dist/checker(.exe) and dist/syntaxchecker-mcp(.exe)
 make test            # runs the unit tests
 make build-windows   # cross-build for Windows
 make build-linux     # cross-build for Linux
@@ -70,7 +70,7 @@ See [`apps/mcp-server/README.md`](apps/mcp-server/README.md) for details and [`f
 {
   "mcpServers": {
     "syntaxchecker": {
-      "command": "C:\\path\\to\\dist\\mcp-server.exe",
+      "command": "C:\\path\\to\\dist\\syntaxchecker-mcp.exe",
       "env": { "CHECKER_BIN": "C:\\path\\to\\dist\\checker.exe" }
     }
   }

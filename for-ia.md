@@ -30,13 +30,13 @@ make build
 
 Produces:
 - `dist/checker(.exe)` — validation CLI.
-- `dist/mcp-server(.exe)` — MCP server (stdio transport).
+- `dist/syntaxchecker-mcp(.exe)` — MCP server (stdio transport).
 
 If `make` is not available (Windows without make):
 
 ```
 cd apps/checker     && go build -o ../../dist/checker.exe .
-cd apps/mcp-server  && go build -o ../../dist/mcp-server.exe .
+cd apps/mcp-server  && go build -o ../../dist/syntaxchecker-mcp.exe .
 ```
 
 ### 2. MCP client configuration
@@ -49,7 +49,7 @@ File: `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Appl
 {
   "mcpServers": {
     "syntaxchecker": {
-      "command": "C:\\absolute\\path\\dist\\mcp-server.exe",
+      "command": "C:\\absolute\\path\\dist\\syntaxchecker-mcp.exe",
       "env": { "CHECKER_BIN": "C:\\absolute\\path\\dist\\checker.exe" }
     }
   }
@@ -63,6 +63,25 @@ Restart the MCP client after editing the config.
 #### VS Code (MCP extension)
 
 Same JSON shape under the `mcpServers` key in the extension configuration.
+
+#### OpenCode
+
+File: `~/.config/opencode/opencode.json` (Linux/macOS) or `%APPDATA%\opencode\opencode.json` (Windows).
+
+```json
+{
+  "mcp": {
+    "syntaxchecker": {
+      "type": "local",
+      "command": ["C:\\absolute\\path\\dist\\syntaxchecker-mcp.exe"],
+      "environment": { "CHECKER_BIN": "C:\\absolute\\path\\dist\\checker.exe" },
+      "enabled": true
+    }
+  }
+}
+```
+
+Restart OpenCode after editing the config.
 
 ### 3. Verify the installation
 
@@ -130,8 +149,8 @@ Structured content with this shape:
 
 ## Common errors and troubleshooting
 
-- **Tool not available in the client**: the server did not start. Check the `command` path, restart the client, and make sure `mcp-server.exe` exists.
-- **"checker binary not found"**: the server cannot locate `checker(.exe)`. Set `CHECKER_BIN` or place it in the same folder as `mcp-server.exe`.
+- **Tool not available in the client**: the server did not start. Check the `command` path, restart the client, and make sure `syntaxchecker-mcp.exe` exists.
+- **"checker binary not found"**: the server cannot locate `checker(.exe)`. Set `CHECKER_BIN` or place it in the same folder as `syntaxchecker-mcp.exe`.
 - **All SQL validations fail in odd ways**: you probably omitted `type` and auto-detect picked an unsuitable dialect. Pass the explicit dialect.
 - **First `sql:postgres` call is slow (~700 ms)**: normal. That is the WASM module init, once per process.
 
