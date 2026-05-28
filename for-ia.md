@@ -110,7 +110,8 @@ check_syntax(file_path: string, type?: string, schema?: string, strict?: boolean
 - **`type`** (optional) — forces the type. If omitted, the checker auto-detects from the extension (`.json`, `.xml`, `.yml`/`.yaml`, `.sql`).
   - **Important for `.sql`**: auto-detect does NOT know which dialect to use. For SQL files **you must always pass `type`** with the correct dialect, otherwise the checker fails or uses an unwanted default.
   - Valid values: `json`, `xml`, `yaml`, `sql:mysql`, `sql:postgres` (alias `sql:postgresql`), `sql:ansi`, `sql:sqlite`, `sql:mssql` (alias `sql:tsql`), `sql:oracle` (alias `sql:plsql`).
-- **`schema`** (optional) — path to a JSON Schema (draft 2020-12) to validate the document against. Supported for `json` and `yaml` only. Passing it for an XML file returns an error (XSD validation is not supported). Violations are reported by instance location (a JSON pointer like `/items/0/name`), not by source line.
+- **`schema`** (optional) — path to a JSON Schema (drafts up to 2020-12, including draft-07) to validate the document against. Supported for `json` and `yaml` only. Passing it for an XML file returns an error (XSD validation is not supported). Violations are reported by instance location (a JSON pointer like `/items/0/name`), not by source line.
+  - **`format` is annotation-only** (e.g. `email`, `date` are NOT enforced); structural keywords (`type`, `required`, `enum`, `pattern`, ranges, `oneOf`, `$ref`, …) ARE enforced. Do not assume a malformed email fails validation.
 - **`strict`** (optional, bool) — enables stricter checks. Known effect:
   - JSON: detects duplicate keys (otherwise silently ignored by the standard parser).
   - Other formats: no effect for now, but passing `true` is harmless.
