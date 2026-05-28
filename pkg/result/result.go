@@ -5,10 +5,11 @@ import "unicode/utf8"
 
 // CheckResult is the outcome of validating a single file.
 type CheckResult struct {
-	File   string        `json:"file"`
-	Type   string        `json:"type"`
-	Valid  bool          `json:"valid"`
-	Errors []SyntaxError `json:"errors,omitempty"`
+	File         string        `json:"file"`
+	Type         string        `json:"type"`
+	AutoDetected bool          `json:"auto_detected,omitempty"`
+	Valid        bool          `json:"valid"`
+	Errors       []SyntaxError `json:"errors,omitempty"`
 }
 
 // SyntaxError is a single problem found in a file. Line and Column are 1-based;
