@@ -11,8 +11,8 @@ output as structured content.
 - `file_path` — path to the file (absolute or relative to the server's working directory).
 - `type` — optional; forces the type. If omitted, auto-detected from the extension.
   Values: `json`, `xml`, `yaml`, `toml`, `ini`, `csv`, `tsv`, `hcl`, `markdown`,
-  `env`, `properties`, `sql:mysql`, `sql:postgres`, `sql:ansi`, `sql:sqlite`,
-  `sql:mssql`, `sql:oracle`.
+  `env`, `properties`, `proto`, `sql:mysql`, `sql:postgres`, `sql:ansi`,
+  `sql:sqlite`, `sql:mssql`, `sql:oracle`.
 - `schema` — optional; path to a JSON Schema to validate the document against.
   Supported for `json` and `yaml` only (XSD validation for XML is not supported).
 - `strict` — optional; enables stricter checks (e.g. duplicate JSON keys).

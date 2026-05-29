@@ -17,6 +17,7 @@ Multi-format syntax validator, shipped as a CLI (`syntax-checker`) and as an MCP
 | Markdown | `markdown` | `.md`, `.markdown`; parse-only (Markdown has no invalid syntax) |
 | .env | `env` | `.env`; KEY=VALUE assignments |
 | Properties | `properties` | `.properties`; reports malformed `\uXXXX` escapes and circular `${...}` refs |
+| Protobuf | `proto` | `.proto`; non-permissive well-formedness (no import/type resolution) |
 | SQL MySQL | `sql:mysql` | TiDB parser |
 | SQL PostgreSQL | `sql:postgres` / `sql:postgresql` | Official parser via WASM |
 | SQL ANSI | `sql:ansi` | Mapped to the PostgreSQL parser |

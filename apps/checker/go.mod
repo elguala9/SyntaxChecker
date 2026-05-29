@@ -14,6 +14,7 @@ require (
 	github.com/rqlite/sql v0.0.0-20260224021119-1b2524a41372
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
 	github.com/wasilibs/go-pgquery v0.0.0-20260526011917-40df1ddb6e56
+	github.com/yoheimuta/go-protoparser/v4 v4.14.2
 	github.com/yuin/goldmark v1.8.2
 	gopkg.in/ini.v1 v1.67.2
 	gopkg.in/yaml.v3 v3.0.1

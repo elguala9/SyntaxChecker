@@ -134,6 +134,24 @@ func TestPropertiesCircular(t *testing.T) {
 	}
 }
 
+func TestProtobufValid(t *testing.T) {
+	src := "syntax = \"proto3\";\nmessage M {\n  string id = 1;\n}\n"
+	if errs := (Protobuf{}).Check([]byte(src), false); len(errs) != 0 {
+		t.Fatalf("expected valid, got %v", errs)
+	}
+}
+
+func TestProtobufErrorPosition(t *testing.T) {
+	src := "syntax = \"proto3\";\nmessage M {\n  id = 1;\n}\n"
+	errs := Protobuf{}.Check([]byte(src), false)
+	if len(errs) == 0 {
+		t.Fatal("expected an error")
+	}
+	if errs[0].Line == 0 {
+		t.Errorf("expected a line number, got %+v", errs[0])
+	}
+}
+
 // --- Self-discovering end-to-end test over test-samples ---------------------
 
 // validatorByExt returns the Validator for a sample file extension, and whether
@@ -156,6 +174,8 @@ func validatorByExt(ext string) (Validator, bool) {
 		return Env{}, true
 	case ".properties":
 		return Properties{}, true
+	case ".proto":
+		return Protobuf{}, true
 	default:
 		return nil, false
 	}
@@ -167,7 +187,7 @@ func validatorByExt(ext string) (Validator, bool) {
 // Strict mode is used so format-specific strict checks are exercised.
 func TestParserSamples(t *testing.T) {
 	root := filepath.Join("..", "..", "..", "test-samples")
-	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties"}
+	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto"}
 
 	for _, d := range dirs {
 		entries, err := os.ReadDir(filepath.Join(root, d))
