@@ -24,12 +24,27 @@ Multi-format syntax validator, shipped as a CLI (`syntax-checker`) and as an MCP
 | GraphQL | `graphql` / `gql` | `.graphql`, `.gql`; valid as either an SDL schema or an executable document |
 | Dockerfile | `dockerfile` | `Dockerfile`, `Containerfile`, `*.dockerfile`; structural parse + unknown-instruction/argument checks |
 | jq | `jq` | `.jq`; jq program syntax (parse-only) |
+| Go | `go` / `golang` | `.go`; stdlib `go/parser` (parse-only, no type-check; file must start with a package clause) |
+| TypeScript | `ts` / `typescript`, `tsx` | `.ts`, `.tsx`; esbuild parser (parse-only, no type-check) |
+| JavaScript | `js` / `javascript`, `jsx` | `.js`, `.mjs`, `.cjs`, `.jsx`; esbuild parser |
+| Shell | `shell` / `bash` / `sh` | `.sh`, `.bash`; Bash-mode parse via `mvdan.cc/sh` (parse-only) |
+| Lua | `lua` | `.lua`; Lua 5.1 parse via gopher-lua (parse-only) |
+| Starlark | `starlark` / `bzl` | `.star`, `.bzl`, `BUILD.bazel`, `WORKSPACE.bazel`; go.starlark.net parser |
 | SQL MySQL | `sql:mysql` | TiDB parser |
 | SQL PostgreSQL | `sql:postgres` / `sql:postgresql` | Official parser via WASM |
 | SQL ANSI | `sql:ansi` | Mapped to the PostgreSQL parser |
 | SQL SQLite | `sql:sqlite` | rqlite/sql |
 | SQL SQL Server | `sql:mssql` / `sql:tsql` | ANTLR4 |
 | SQL Oracle | `sql:oracle` / `sql:plsql` | ANTLR4 |
+
+Across `test-samples/`, files whose name contains `_not_correct` are expected to
+fail. Some of them only fail under `--strict`, because the format's lenient mode
+accepts the input by design — notably `html/stray_close_not_correct.html`
+(unbalanced tags are silently repaired by the tolerant HTML5 parse) and
+`yaml/custom_tag_not_correct.yaml` (custom tags are valid YAML, rejected only in
+strict). The test suite always checks samples in strict mode, so these still
+validate the parsers; when probing a file by hand (CLI or MCP) without `--strict`
+it may report valid.
 
 ## Layout
 
@@ -141,6 +156,9 @@ This is negligible for interactive use; for high throughput the MCP server could
 Phase 1 (CLI) and Phase 2 (MCP server) completed, plus JSON Schema validation
 for JSON and YAML, DTD validation for XML, the simple-format parsers (TOML, INI,
 CSV/TSV, HCL, Markdown, .env, Properties) and the medium-format parsers
-(JSON5/JSONC, Protobuf, GraphQL, HTML, Dockerfile, jq). Out-of-scope:
-XSD/RelaxNG for XML (cgo/libxml2 would break the static binary), assertive
-`format` validation, JSONPath.
+(JSON5/JSONC, Protobuf, GraphQL, HTML, Dockerfile, jq) and the first
+programming-language parsers (Go, TypeScript/JavaScript, Shell, Lua, Starlark —
+all pure-Go, parse-only; see `TODO-languages.md` for the feasibility of others).
+Out-of-scope: XSD/RelaxNG for XML (cgo/libxml2 would break the static binary),
+assertive `format` validation, JSONPath, and languages that require cgo/native
+toolchains (C/C++, etc. — see `TODO-languages.md`).

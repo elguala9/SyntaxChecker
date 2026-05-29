@@ -30,6 +30,9 @@ function Resolve-Type([System.IO.FileInfo]$file) {
   if ($name -eq "dockerfile" -or $name -eq "containerfile" -or $name -like "dockerfile.*") {
     return "dockerfile"
   }
+  if ($name -eq "build.bazel" -or $name -eq "workspace.bazel") {
+    return "starlark"
+  }
   switch ($file.Extension.ToLower()) {
     ".json" { return "json" }
     ".sql"  {
@@ -64,6 +67,18 @@ function Resolve-Type([System.IO.FileInfo]$file) {
     ".proto"   { return "proto" }
     ".graphql" { return "graphql" }
     ".gql"     { return "graphql" }
+    ".go"   { return "go" }
+    ".ts"   { return "ts" }
+    ".tsx"  { return "tsx" }
+    ".js"   { return "js" }
+    ".mjs"  { return "js" }
+    ".cjs"  { return "js" }
+    ".jsx"  { return "jsx" }
+    ".lua"  { return "lua" }
+    ".sh"   { return "shell" }
+    ".bash" { return "shell" }
+    ".star" { return "starlark" }
+    ".bzl"  { return "starlark" }
     default { return $null }  # no checker for this extension yet
   }
 }
