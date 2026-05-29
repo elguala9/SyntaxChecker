@@ -20,10 +20,37 @@ func TestGoErrorPosition(t *testing.T) {
 	}
 }
 
+func TestGoGenericsValid(t *testing.T) {
+	src := "package p\n\nfunc Map[T, U any](xs []T, f func(T) U) []U {\n\tout := make([]U, len(xs))\n\tfor i, x := range xs {\n\t\tout[i] = f(x)\n\t}\n\treturn out\n}\n"
+	if errs := (Go{}).Check([]byte(src), false); len(errs) != 0 {
+		t.Fatalf("expected valid generics, got %v", errs)
+	}
+}
+
+func TestGoMissingPackage(t *testing.T) {
+	// A Go file with no package clause must be rejected.
+	if errs := (Go{}).Check([]byte("import \"fmt\"\n\nfunc main() {}\n"), false); len(errs) == 0 {
+		t.Fatal("expected an error for the missing package clause")
+	}
+}
+
 func TestTypeScriptValid(t *testing.T) {
 	src := "const n: number = 1;\nfunction f(x: string): string { return x; }\n"
 	if errs := (JS{Dialect: "ts"}).Check([]byte(src), false); len(errs) != 0 {
 		t.Fatalf("expected valid, got %v", errs)
+	}
+}
+
+func TestTypeScriptGenericsValid(t *testing.T) {
+	src := "class Box<T> { constructor(private v: T) {} get(): T { return this.v; } }\n"
+	if errs := (JS{Dialect: "ts"}).Check([]byte(src), false); len(errs) != 0 {
+		t.Fatalf("expected valid generics, got %v", errs)
+	}
+}
+
+func TestTypeScriptMalformedEnum(t *testing.T) {
+	if errs := (JS{Dialect: "ts"}).Check([]byte("enum E {\n  A\n  B\n}\n"), false); len(errs) == 0 {
+		t.Fatal("expected an error for the missing comma between enum members")
 	}
 }
 
@@ -47,6 +74,20 @@ func TestTSXValid(t *testing.T) {
 func TestJavaScriptValid(t *testing.T) {
 	if errs := (JS{Dialect: "js"}).Check([]byte("const xs = [1, 2].map((x) => x * 2);\n"), false); len(errs) != 0 {
 		t.Fatalf("expected valid, got %v", errs)
+	}
+}
+
+func TestJavaScriptClassValid(t *testing.T) {
+	src := "class C {\n  #x = 1;\n  async run() { return await Promise.resolve(this.#x); }\n}\n"
+	if errs := (JS{Dialect: "js"}).Check([]byte(src), false); len(errs) != 0 {
+		t.Fatalf("expected valid class, got %v", errs)
+	}
+}
+
+func TestJavaScriptDuplicateParam(t *testing.T) {
+	// Duplicate parameter names are a syntax error in strict/module code.
+	if errs := (JS{Dialect: "js"}).Check([]byte("\"use strict\";\nfunction f(a, a) { return a; }\n"), false); len(errs) == 0 {
+		t.Fatal("expected an error for the duplicate parameter")
 	}
 }
 
@@ -74,10 +115,24 @@ func TestLuaMissingEnd(t *testing.T) {
 	}
 }
 
+func TestLuaTablesValid(t *testing.T) {
+	src := "local t = setmetatable({ x = 1 }, { __index = function() return 0 end })\nprint(t.x, t.y)\n"
+	if errs := (Lua{}).Check([]byte(src), false); len(errs) != 0 {
+		t.Fatalf("expected valid tables, got %v", errs)
+	}
+}
+
 func TestShellValid(t *testing.T) {
 	src := "for i in 1 2 3; do\n  echo \"$i\"\ndone\n"
 	if errs := (Shell{}).Check([]byte(src), false); len(errs) != 0 {
 		t.Fatalf("expected valid, got %v", errs)
+	}
+}
+
+func TestShellCaseValid(t *testing.T) {
+	src := "case \"$1\" in\n  a) echo one ;;\n  b|c) echo two ;;\n  *) echo other ;;\nesac\n"
+	if errs := (Shell{}).Check([]byte(src), false); len(errs) != 0 {
+		t.Fatalf("expected valid case, got %v", errs)
 	}
 }
 
