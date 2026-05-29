@@ -1,0 +1,11 @@
+{
+  // editor settings
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  /* nested block */
+  "files.exclude": {
+    "**/.git": true,
+    "**/node_modules": true,
+  },
+  "search.useIgnoreFiles": false,
+}

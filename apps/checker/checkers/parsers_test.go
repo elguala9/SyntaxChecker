@@ -174,6 +174,37 @@ func TestGraphQLErrorPosition(t *testing.T) {
 	}
 }
 
+func TestJSON5Valid(t *testing.T) {
+	src := "{\n  // comment\n  name: 'x',\n  n: 0xFF,\n}\n"
+	if errs := (JSON5{}).Check([]byte(src), false); len(errs) != 0 {
+		t.Fatalf("expected valid, got %v", errs)
+	}
+}
+
+func TestJSON5ErrorPosition(t *testing.T) {
+	errs := JSON5{}.Check([]byte("{\n  name: 'x',\n  arr: [1, 2,\n}\n"), false)
+	if len(errs) == 0 {
+		t.Fatal("expected an error")
+	}
+	if errs[0].Line == 0 {
+		t.Errorf("expected a line number, got %+v", errs[0])
+	}
+}
+
+func TestJSONCValid(t *testing.T) {
+	src := "{\n  // comment\n  \"a\": 1,\n  \"b\": [1, 2,],\n}\n"
+	if errs := (JSONC{}).Check([]byte(src), false); len(errs) != 0 {
+		t.Fatalf("expected valid, got %v", errs)
+	}
+}
+
+func TestJSONCMissingComma(t *testing.T) {
+	errs := JSONC{}.Check([]byte("{\n  \"a\": 1\n  \"b\": 2\n}\n"), false)
+	if len(errs) == 0 {
+		t.Fatal("expected an error for the missing comma")
+	}
+}
+
 // --- Self-discovering end-to-end test over test-samples ---------------------
 
 // validatorByExt returns the Validator for a sample file extension, and whether
@@ -200,6 +231,10 @@ func validatorByExt(ext string) (Validator, bool) {
 		return Protobuf{}, true
 	case ".graphql", ".gql":
 		return GraphQL{}, true
+	case ".json5":
+		return JSON5{}, true
+	case ".jsonc":
+		return JSONC{}, true
 	default:
 		return nil, false
 	}
@@ -211,7 +246,7 @@ func validatorByExt(ext string) (Validator, bool) {
 // Strict mode is used so format-specific strict checks are exercised.
 func TestParserSamples(t *testing.T) {
 	root := filepath.Join("..", "..", "..", "test-samples")
-	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto", "graphql"}
+	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto", "graphql", "json5", "jsonc"}
 
 	for _, d := range dirs {
 		entries, err := os.ReadDir(filepath.Join(root, d))

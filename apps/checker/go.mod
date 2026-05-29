@@ -13,6 +13,8 @@ require (
 	github.com/pingcap/tidb/pkg/parser v0.0.0-20260527114842-beb12a7923d3
 	github.com/rqlite/sql v0.0.0-20260224021119-1b2524a41372
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
+	github.com/tidwall/jsonc v0.3.3
+	github.com/titanous/json5 v1.0.0
 	github.com/vektah/gqlparser/v2 v2.5.33
 	github.com/wasilibs/go-pgquery v0.0.0-20260526011917-40df1ddb6e56
 	github.com/yoheimuta/go-protoparser/v4 v4.14.2

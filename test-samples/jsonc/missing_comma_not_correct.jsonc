@@ -1,0 +1,5 @@
+{
+  // missing comma between the two properties
+  "host": "localhost"
+  "port": 8080
+}

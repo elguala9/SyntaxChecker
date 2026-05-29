@@ -135,6 +135,10 @@ func detectType(file string, data []byte) string {
 	switch strings.ToLower(filepath.Ext(file)) {
 	case ".json":
 		return "json"
+	case ".json5":
+		return "json5"
+	case ".jsonc":
+		return "jsonc"
 	case ".proto":
 		return "proto"
 	case ".graphql", ".gql":
@@ -261,6 +265,10 @@ func validatorFor(typ string) (checkers.Validator, error) {
 	switch strings.ToLower(typ) {
 	case "json":
 		return checkers.JSON{}, nil
+	case "json5":
+		return checkers.JSON5{}, nil
+	case "jsonc":
+		return checkers.JSONC{}, nil
 	case "proto", "protobuf":
 		return checkers.Protobuf{}, nil
 	case "graphql", "gql":
