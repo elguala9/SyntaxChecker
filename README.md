@@ -7,6 +7,8 @@ Multi-format syntax validator, shipped as a CLI (`syntax-checker`) and as an MCP
 | Kind | `--type` | Notes |
 |---|---|---|
 | JSON | `json` | `--strict` detects duplicate keys; `--schema` validates against a JSON Schema |
+| JSON5 | `json5` | `.json5`; comments, trailing commas, single quotes, unquoted keys, hex/Infinity/NaN |
+| JSONC | `jsonc` | `.jsonc`; JSON with comments and trailing commas (stripped, then validated as JSON) |
 | XML | `xml` | Well-formedness only (no DTD/XSD validation — see below) |
 | YAML | `yaml` | `.yml` and `.yaml`; `--schema` validates against a JSON Schema |
 | TOML | `toml` | `.toml`; reports line/column, including duplicate keys |
@@ -129,6 +131,7 @@ This is negligible for interactive use; for high throughput the MCP server could
 ## Status
 
 Phase 1 (CLI) and Phase 2 (MCP server) completed, plus JSON Schema validation
-for JSON and YAML and the simple-format parsers (TOML, INI, CSV/TSV, HCL,
-Markdown, .env, Properties). Out-of-scope backlog: XSD for XML, assertive
-`format` validation, JSON5/JSONC, HTML, GraphQL, Protobuf, Dockerfile.
+for JSON and YAML, the simple-format parsers (TOML, INI, CSV/TSV, HCL,
+Markdown, .env, Properties) and the medium-format parsers (JSON5/JSONC,
+Protobuf, GraphQL). Out-of-scope backlog: XSD for XML, assertive
+`format` validation, HTML, Dockerfile, JSONPath/JQ.
