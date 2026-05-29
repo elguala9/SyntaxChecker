@@ -1,0 +1,24 @@
+"""A registered user account."""
+type User {
+  id: ID!
+  email: String!
+  roles: [String!]!
+  status: Status!
+}
+
+enum Status {
+  ACTIVE
+  DISABLED
+}
+
+input GetUserInput {
+  id: ID!
+}
+
+type Query {
+  user(input: GetUserInput!): User
+}
+
+type Mutation {
+  disableUser(id: ID!): User!
+}
