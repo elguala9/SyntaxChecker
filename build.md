@@ -2,17 +2,23 @@
 
 Instructions to compile the `syntax-checker` and `syntaxchecker-mcp` binaries into the `dist/` folder.
 
+Builds are driven by [Mage](https://magefile.org), a Go-native task runner (the build
+tasks live in `magefiles/magefile.go`). It works the same on Windows, Linux, and macOS.
+
 ## Prerequisites
 
 - Go 1.25+ (`go version`)
-- `make` available in your shell
-  - Windows: use Git Bash, WSL, or install `make` (e.g. `choco install make`)
+- Mage:
+  ```bash
+  go install github.com/magefile/mage@latest
+  ```
+  Make sure `$(go env GOPATH)/bin` is on your `PATH` so the `mage` command is found.
 - Run all commands from the repository root
 
 ## Build for the current platform
 
 ```bash
-make build
+mage build       # or just: mage
 ```
 
 Produces in `dist/`:
@@ -22,8 +28,14 @@ Produces in `dist/`:
 To build only one of them:
 
 ```bash
-make build-checker
-make build-mcp
+mage checker
+mage mcp
+```
+
+List every available target:
+
+```bash
+mage -l
 ```
 
 ## Cross-platform build
@@ -31,7 +43,7 @@ make build-mcp
 ### Windows (`.exe`)
 
 ```bash
-make build-windows
+mage windows
 ```
 
 Generates `dist/syntax-checker.exe` and `dist/syntaxchecker-mcp.exe` (target `windows/amd64`).
@@ -39,14 +51,14 @@ Generates `dist/syntax-checker.exe` and `dist/syntaxchecker-mcp.exe` (target `wi
 ### Linux
 
 ```bash
-make build-linux
+mage linux
 ```
 
 Generates `dist/syntax-checker` and `dist/syntaxchecker-mcp` (target `linux/amd64`).
 
-## Manual build (without make)
+## Manual build (without Mage)
 
-If `make` is not available, from PowerShell:
+If you prefer not to install Mage, from PowerShell:
 
 ```powershell
 $env:CGO_ENABLED = "0"
@@ -60,12 +72,8 @@ $BUILDDATE = (Get-Date -AsUTC -Format "yyyy-MM-ddTHH:mm:ssZ")
 $LDFLAGS = "-s -w -X main.version=$VERSION -X main.commit=$COMMIT -X main.buildDate=$BUILDDATE"
 
 New-Item -ItemType Directory -Force dist | Out-Null
-Push-Location apps/checker
-go build -trimpath -ldflags "$LDFLAGS" -o ../../dist/syntax-checker.exe .
-Pop-Location
-Push-Location apps/mcp-server
-go build -trimpath -ldflags "-s -w" -o ../../dist/syntaxchecker-mcp.exe .
-Pop-Location
+go build -trimpath -ldflags "$LDFLAGS" -o dist/syntax-checker.exe ./apps/checker
+go build -trimpath -ldflags "-s -w"    -o dist/syntaxchecker-mcp.exe ./apps/mcp-server
 ```
 
 ## Verify
@@ -78,7 +86,7 @@ Pop-Location
 ## Clean
 
 ```bash
-make clean
+mage clean
 ```
 
 Removes the `dist/` folder.

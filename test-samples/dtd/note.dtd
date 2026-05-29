@@ -1,0 +1,9 @@
+<!-- DTD for a simple note document -->
+<!ELEMENT note (to, from, heading, body)>
+<!ELEMENT to (#PCDATA)>
+<!ELEMENT from (#PCDATA)>
+<!ELEMENT heading (#PCDATA)>
+<!ELEMENT body (#PCDATA)>
+<!ATTLIST note
+  priority (low|normal|high) #REQUIRED
+  lang     CDATA            #IMPLIED>

@@ -132,13 +132,66 @@ func run() int {
 // inspects the filename and content to guess the dialect. Returns "" when
 // the extension is unknown.
 func detectType(file string, data []byte) string {
+	// Dockerfiles are matched by name: they conventionally have no extension.
+	switch base := strings.ToLower(filepath.Base(file)); {
+	case base == "dockerfile", base == "containerfile",
+		strings.HasPrefix(base, "dockerfile."), strings.HasSuffix(base, ".dockerfile"):
+		return "dockerfile"
+	case base == "build.bazel", base == "workspace.bazel":
+		return "starlark"
+	}
+
 	switch strings.ToLower(filepath.Ext(file)) {
 	case ".json":
 		return "json"
+	case ".json5":
+		return "json5"
+	case ".jsonc":
+		return "jsonc"
+	case ".proto":
+		return "proto"
+	case ".graphql", ".gql":
+		return "graphql"
 	case ".xml", ".xhtml":
 		return "xml"
+	case ".html", ".htm":
+		return "html"
+	case ".jq":
+		return "jq"
+	case ".go":
+		return "go"
+	case ".ts":
+		return "ts"
+	case ".tsx":
+		return "tsx"
+	case ".js", ".mjs", ".cjs":
+		return "js"
+	case ".jsx":
+		return "jsx"
+	case ".lua":
+		return "lua"
+	case ".sh", ".bash":
+		return "shell"
+	case ".star", ".bzl":
+		return "starlark"
 	case ".yml", ".yaml":
 		return "yaml"
+	case ".toml":
+		return "toml"
+	case ".ini", ".cfg":
+		return "ini"
+	case ".csv":
+		return "csv"
+	case ".tsv":
+		return "tsv"
+	case ".hcl", ".tf":
+		return "hcl"
+	case ".md", ".markdown":
+		return "markdown"
+	case ".env":
+		return "env"
+	case ".properties":
+		return "properties"
 	case ".sql":
 		return detectSQLDialect(file, data)
 	default:
@@ -241,6 +294,14 @@ func validatorFor(typ string) (checkers.Validator, error) {
 	switch strings.ToLower(typ) {
 	case "json":
 		return checkers.JSON{}, nil
+	case "json5":
+		return checkers.JSON5{}, nil
+	case "jsonc":
+		return checkers.JSONC{}, nil
+	case "proto", "protobuf":
+		return checkers.Protobuf{}, nil
+	case "graphql", "gql":
+		return checkers.GraphQL{}, nil
 	case "sql:mysql":
 		return checkers.MySQL{}, nil
 	case "sql:postgres", "sql:postgresql", "sql:ansi":
@@ -253,8 +314,46 @@ func validatorFor(typ string) (checkers.Validator, error) {
 		return checkers.Oracle{}, nil
 	case "xml":
 		return checkers.XML{}, nil
+	case "html", "htm":
+		return checkers.HTML{}, nil
+	case "dockerfile":
+		return checkers.Dockerfile{}, nil
+	case "jq":
+		return checkers.JQ{}, nil
+	case "go", "golang":
+		return checkers.Go{}, nil
+	case "ts", "typescript":
+		return checkers.JS{Dialect: "ts"}, nil
+	case "tsx":
+		return checkers.JS{Dialect: "tsx"}, nil
+	case "js", "javascript":
+		return checkers.JS{Dialect: "js"}, nil
+	case "jsx":
+		return checkers.JS{Dialect: "jsx"}, nil
+	case "lua":
+		return checkers.Lua{}, nil
+	case "shell", "bash", "sh":
+		return checkers.Shell{}, nil
+	case "starlark", "bzl":
+		return checkers.Starlark{}, nil
 	case "yaml":
 		return checkers.YAML{}, nil
+	case "toml":
+		return checkers.TOML{}, nil
+	case "ini":
+		return checkers.INI{}, nil
+	case "csv":
+		return checkers.CSV{Comma: ','}, nil
+	case "tsv":
+		return checkers.CSV{Comma: '\t'}, nil
+	case "hcl":
+		return checkers.HCL{}, nil
+	case "markdown":
+		return checkers.Markdown{}, nil
+	case "env":
+		return checkers.Env{}, nil
+	case "properties":
+		return checkers.Properties{}, nil
 	default:
 		return nil, fmt.Errorf("unsupported type %q", typ)
 	}

@@ -100,8 +100,8 @@ git push origin v1.2.0
 ## Pre-release checklist
 
 - [ ] `master` up to date, CI green
-- [ ] `make test` and `make lint` pass locally
-- [ ] `make build-windows` and `make build-linux` work (see `build.md`)
+- [ ] `mage test` and `mage lint` pass locally
+- [ ] `mage windows` and `mage linux` work (see `build.md`)
 - [ ] Version chosen following SemVer
 - [ ] Annotated tag (`git tag -a`) with a message
 - [ ] Tag pushed → `Release` workflow green on GitHub Actions

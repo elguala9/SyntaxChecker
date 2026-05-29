@@ -1,5 +1,5 @@
 ; SyntaxChecker - Inno Setup script
-; Build: iscc installer.iss  (oppure: make installer)
+; Build: iscc installer.iss  (oppure: mage installer)
 ; Produces: dist\SyntaxChecker-Setup.exe
 
 #define MyAppName        "SyntaxChecker"

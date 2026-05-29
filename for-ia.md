@@ -4,22 +4,23 @@ This document is intended for an AI assistant (Claude, etc.) that needs to insta
 
 ## What it is
 
-`syntaxchecker` is an MCP server that exposes a single tool, `check_syntax`, capable of validating files in JSON, XML, YAML and SQL (MySQL, PostgreSQL/ANSI, SQLite, SQL Server, Oracle). Use it when the user asks you to **verify the syntax** of a code/configuration file, or when you have just produced a file and want to confirm its validity before delivering it.
+`syntaxchecker` is an MCP server that exposes a single tool, `check_syntax`, capable of validating files in JSON, JSON5, JSONC, XML, HTML, YAML, TOML, INI, CSV/TSV, HCL, Markdown, `.env`, Java Properties, Protobuf, GraphQL, Dockerfile, jq, the programming languages Go, TypeScript/JavaScript (incl. JSX/TSX), Shell/Bash, Lua and Starlark, and SQL (MySQL, PostgreSQL/ANSI, SQLite, SQL Server, Oracle). Use it when the user asks you to **verify the syntax** of a code/configuration file, or when you have just produced a file and want to confirm its validity before delivering it. The programming-language checks are **parse-only** (no type-checking, no name/import resolution).
 
 ## When to use it
 
 USE `check_syntax` when:
 - The user explicitly asks to validate/check a file's syntax.
-- You have just written or edited a JSON/XML/YAML/SQL file and want to verify it before considering the task complete.
+- You have just written or edited a JSON/JSON5/JSONC/XML/HTML/YAML/TOML/INI/CSV/HCL/Markdown/`.env`/Properties/Protobuf/GraphQL/Dockerfile/jq/Go/TypeScript/JavaScript/Shell/Lua/Starlark/SQL file and want to verify it before considering the task complete.
 - You are debugging a parsing error in one of these formats.
 
 USE `check_syntax` with `schema` when:
 - You need to validate a JSON or YAML file against a JSON Schema (structure, required fields, types, constraints) — pass the schema's path in `schema`.
+- You need to validate an XML file against a DTD — pass the DTD's path in `schema`.
 
 DO NOT use it for:
-- Semantic validation (e.g. "does this SQL do the right thing?") — the tool checks syntax only.
-- XSD validation for XML — not supported (only JSON/YAML support schema validation).
-- Languages not listed (Python, Go, TS, etc.).
+- Semantic validation (e.g. "does this SQL do the right thing?", type errors, undefined variables) — the tool checks syntax/parsing only.
+- XSD/RelaxNG validation for XML — not supported (XML supports DTD only; JSON/YAML support JSON Schema).
+- Languages not listed (Python, Java, C/C++, Rust, etc.).
 
 ## Installation
 
@@ -28,18 +29,18 @@ DO NOT use it for:
 From the repo root, with Go 1.22+:
 
 ```
-make build
+mage build
 ```
 
 Produces:
 - `dist/syntax-checker(.exe)` — validation CLI.
 - `dist/syntaxchecker-mcp(.exe)` — MCP server (stdio transport).
 
-If `make` is not available (Windows without make):
+If Mage is not installed:
 
 ```
-cd apps/checker     && go build -o ../../dist/syntax-checker.exe .
-cd apps/mcp-server  && go build -o ../../dist/syntaxchecker-mcp.exe .
+go build -o dist/syntax-checker.exe ./apps/checker
+go build -o dist/syntaxchecker-mcp.exe ./apps/mcp-server
 ```
 
 ### 2. MCP client configuration
@@ -107,13 +108,17 @@ check_syntax(file_path: string, type?: string, schema?: string, strict?: boolean
 ### Parameters
 
 - **`file_path`** (required) — path to the file. Absolute or relative to the server's working directory. Prefer absolute paths to avoid ambiguity.
-- **`type`** (optional) — forces the type. If omitted, the checker auto-detects from the extension (`.json`, `.xml`, `.yml`/`.yaml`, `.sql`).
+- **`type`** (optional) — forces the type. If omitted, the checker auto-detects from the extension (`.json`, `.json5`, `.jsonc`, `.xml`, `.html`/`.htm`, `.yml`/`.yaml`, `.toml`, `.ini`/`.cfg`, `.csv`, `.tsv`, `.hcl`/`.tf`, `.md`/`.markdown`, `.env`, `.properties`, `.proto`, `.graphql`/`.gql`, `.jq`, `.go`, `.ts`, `.tsx`, `.js`/`.mjs`/`.cjs`, `.jsx`, `.lua`, `.sh`/`.bash`, `.star`/`.bzl`, `.sql`) or, by file name, for Dockerfiles (`Dockerfile`, `Containerfile`, `*.dockerfile`) and Bazel (`BUILD.bazel`, `WORKSPACE.bazel`).
   - **Important for `.sql`**: auto-detect does NOT know which dialect to use. For SQL files **you must always pass `type`** with the correct dialect, otherwise the checker fails or uses an unwanted default.
-  - Valid values: `json`, `xml`, `yaml`, `sql:mysql`, `sql:postgres` (alias `sql:postgresql`), `sql:ansi`, `sql:sqlite`, `sql:mssql` (alias `sql:tsql`), `sql:oracle` (alias `sql:plsql`).
-- **`schema`** (optional) — path to a JSON Schema (drafts up to 2020-12, including draft-07) to validate the document against. Supported for `json` and `yaml` only. Passing it for an XML file returns an error (XSD validation is not supported). Violations are reported by instance location (a JSON pointer like `/items/0/name`), not by source line.
+  - **Bazel `BUILD`/`WORKSPACE` without extension** are not auto-detected: pass `type="starlark"`.
+  - Valid values: `json`, `json5`, `jsonc`, `xml`, `html`, `yaml`, `toml`, `ini`, `csv`, `tsv`, `hcl`, `markdown`, `env`, `properties`, `proto`, `graphql` (alias `gql`), `dockerfile`, `jq`, `go` (alias `golang`), `ts` (alias `typescript`), `tsx`, `js` (alias `javascript`), `jsx`, `lua`, `shell` (alias `bash`, `sh`), `starlark` (alias `bzl`), `sql:mysql`, `sql:postgres` (alias `sql:postgresql`), `sql:ansi`, `sql:sqlite`, `sql:mssql` (alias `sql:tsql`), `sql:oracle` (alias `sql:plsql`).
+- **`schema`** (optional) — for `json`/`yaml`, a JSON Schema (drafts up to 2020-12, including draft-07); for `xml`, a DTD. Passing it for any other type returns an error (XSD/RelaxNG are not supported). JSON Schema violations are reported by instance location (a JSON pointer like `/items/0/name`); DTD violations carry the offending element/attribute name.
   - **`format` is annotation-only** (e.g. `email`, `date` are NOT enforced); structural keywords (`type`, `required`, `enum`, `pattern`, ranges, `oneOf`, `$ref`, …) ARE enforced. Do not assume a malformed email fails validation.
-- **`strict`** (optional, bool) — enables stricter checks. Known effect:
+- **`strict`** (optional, bool) — enables stricter checks. Known effects:
   - JSON: detects duplicate keys (otherwise silently ignored by the standard parser).
+  - CSV/TSV: enforces a consistent field count across rows (ragged rows are tolerated without it) and rejects lazy quoting.
+  - HTML: enforces XHTML-style balanced/nested tags (without it, the tolerant HTML5 parse accepts almost anything).
+  - YAML: rejects application-specific custom tags (e.g. `!Point`); anchors/aliases and standard tags stay valid.
   - Other formats: no effect for now, but passing `true` is harmless.
 
 ### Call examples
@@ -144,7 +149,7 @@ Structured content with this shape:
 ```
 
 - `valid: true` → file is syntactically correct. `errors` absent or empty.
-- `valid: false` → at least one error. Every `errors[i]` always has `message`; `line`/`column` may be missing (e.g. YAML does not expose `column`; XML does not expose `column`).
+- `valid: false` → at least one error. Every `errors[i]` always has `message`; `line`/`column` may be missing. JSON, JSON5, TOML, CSV/TSV, HCL, HTML (strict), GraphQL, Protobuf, jq, Go, TypeScript/JavaScript, Shell, Lua and Starlark report both `line` and `column`; YAML, XML and Dockerfile report `line` only; `.env`, INI, Properties, Markdown and DTD violations may report neither.
 
 ## How to interpret results
 

@@ -30,30 +30,26 @@ Dalla root del repo:
 
 Lo script trova `iscc.exe` nel `PATH` o nei path standard di installazione, builda i due exe per `windows/amd64`, poi compila l'installer. Versione presa da `git describe` (fallback `dev`).
 
-## Build via make (se hai make installato)
+## Build via Mage
 
 ```powershell
-make installer
+mage installer
 ```
 
 Cosa fa:
 
-1. Lancia `make build-windows` → builda `dist\syntax-checker.exe` e `dist\syntaxchecker-mcp.exe` per `windows/amd64`.
+1. Lancia `mage windows` → builda `dist\syntax-checker.exe` e `dist\syntaxchecker-mcp.exe` per `windows/amd64`.
 2. Lancia `iscc /DMyAppVersion=<git-version> installer.iss` → produce `dist\SyntaxChecker-Setup.exe`.
 
-La versione viene presa da `git describe --tags --always` (fallback `dev`). Per forzarla:
+La versione viene presa da `git describe --tags --always` (fallback `dev`).
+
+Se `iscc` non è nel `PATH`, indicalo con la variabile d'ambiente `ISCC`:
 
 ```powershell
-make installer VERSION=1.2.3
+$env:ISCC = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"; mage installer
 ```
 
-Se `iscc` non è nel `PATH`:
-
-```powershell
-make installer ISCC="C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
-```
-
-## Build manuale (senza make)
+## Build manuale (senza Mage)
 
 ```powershell
 # 1) build dei due exe per Windows

@@ -1,0 +1,15 @@
+{
+  // line comments are allowed
+  name: 'syntax-checker',     // unquoted key + single quotes
+  version: 2,
+  /* block comment */
+  features: [
+    'json5',
+    'jsonc',
+  ],                          // trailing comma
+  limits: {
+    max: 0xFF,               // hex number
+    ratio: .5,               // leading-dot number
+  },
+  enabled: true,
+}
