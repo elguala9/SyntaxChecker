@@ -268,61 +268,6 @@ func TestJQErrorPosition(t *testing.T) {
 
 // --- Self-discovering end-to-end test over test-samples ---------------------
 
-// validatorByExt returns the Validator for a sample file extension, and whether
-// the extension is one of the simple-parser formats covered here.
-func validatorByExt(ext string) (Validator, bool) {
-	switch ext {
-	case ".toml":
-		return TOML{}, true
-	case ".ini", ".cfg":
-		return INI{}, true
-	case ".csv":
-		return CSV{Comma: ','}, true
-	case ".tsv":
-		return CSV{Comma: '\t'}, true
-	case ".hcl", ".tf":
-		return HCL{}, true
-	case ".md", ".markdown":
-		return Markdown{}, true
-	case ".env":
-		return Env{}, true
-	case ".properties":
-		return Properties{}, true
-	case ".proto":
-		return Protobuf{}, true
-	case ".graphql", ".gql":
-		return GraphQL{}, true
-	case ".json5":
-		return JSON5{}, true
-	case ".jsonc":
-		return JSONC{}, true
-	case ".html", ".htm":
-		return HTML{}, true
-	case ".dockerfile":
-		return Dockerfile{}, true
-	case ".jq":
-		return JQ{}, true
-	case ".go":
-		return Go{}, true
-	case ".ts":
-		return JS{Dialect: "ts"}, true
-	case ".tsx":
-		return JS{Dialect: "tsx"}, true
-	case ".js", ".mjs", ".cjs":
-		return JS{Dialect: "js"}, true
-	case ".jsx":
-		return JS{Dialect: "jsx"}, true
-	case ".lua":
-		return Lua{}, true
-	case ".sh", ".bash":
-		return Shell{}, true
-	case ".star", ".bzl":
-		return Starlark{}, true
-	default:
-		return nil, false
-	}
-}
-
 // TestParserSamples walks test-samples and validates every file whose extension
 // maps to one of the simple parsers. A file whose name contains "_not_correct"
 // must produce at least one error; every other file must validate cleanly.
@@ -342,22 +287,14 @@ func TestParserSamples(t *testing.T) {
 				continue
 			}
 			name := e.Name()
-			v, ok := validatorByExt(strings.ToLower(filepath.Ext(name)))
-			if !ok {
-				// Dockerfiles and Bazel BUILD/WORKSPACE files are matched by name.
-				switch base := strings.ToLower(name); {
-				case base == "dockerfile" || base == "containerfile":
-					v, ok = Dockerfile{}, true
-				case base == "build.bazel" || base == "workspace.bazel":
-					v, ok = Starlark{}, true
-				}
-			}
-			if !ok {
-				continue
-			}
 			data, err := os.ReadFile(filepath.Join(root, d, name))
 			if err != nil {
 				t.Fatalf("cannot read %s: %v", name, err)
+			}
+			// Resolve the validator through the registry, exactly as the CLI does.
+			v, ok := Lookup(DetectByPath(name, data))
+			if !ok {
+				continue
 			}
 			wantInvalid := strings.Contains(name, "_not_correct")
 			t.Run(filepath.Join(d, name), func(t *testing.T) {
