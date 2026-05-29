@@ -344,9 +344,12 @@ func TestParserSamples(t *testing.T) {
 			name := e.Name()
 			v, ok := validatorByExt(strings.ToLower(filepath.Ext(name)))
 			if !ok {
-				// Extension-less Dockerfiles are matched by name.
-				if base := strings.ToLower(name); base == "dockerfile" || base == "containerfile" {
+				// Dockerfiles and Bazel BUILD/WORKSPACE files are matched by name.
+				switch base := strings.ToLower(name); {
+				case base == "dockerfile" || base == "containerfile":
 					v, ok = Dockerfile{}, true
+				case base == "build.bazel" || base == "workspace.bazel":
+					v, ok = Starlark{}, true
 				}
 			}
 			if !ok {

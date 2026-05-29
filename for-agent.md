@@ -1,6 +1,6 @@
 # Setup di `AGENTS.md` / `CLAUDE.md` nei tuoi progetti
 
-Questo documento spiega come configurare un file di istruzioni per gli agenti AI (Claude Code, OpenCode, ecc.) in un progetto, in modo che usino automaticamente il MCP `syntaxchecker` per validare file JSON / XML / YAML / TOML / INI / CSV / HCL / Markdown / `.env` / Properties / SQL.
+Questo documento spiega come configurare un file di istruzioni per gli agenti AI (Claude Code, OpenCode, ecc.) in un progetto, in modo che usino automaticamente il MCP `syntaxchecker` per validare file JSON / JSON5 / JSONC / XML / HTML / YAML / TOML / INI / CSV / HCL / Markdown / `.env` / Properties / Protobuf / GraphQL / Dockerfile / jq / Go / TypeScript / JavaScript / Shell / Lua / Starlark / SQL.
 
 L'installer copia questo file insieme a `for-ia.md` nella cartella di installazione, così è sempre disponibile come riferimento.
 
@@ -28,15 +28,21 @@ Il file deve dire all'agente **quando** invocare `check_syntax` e **come** chiam
 ## Validazione sintattica dei file
 
 In questo progetto è disponibile il MCP server **`syntaxchecker`**, che espone
-il tool `check_syntax` per JSON, XML, YAML, TOML, INI, CSV/TSV, HCL, Markdown,
-`.env`, Properties e SQL (MySQL, PostgreSQL, ANSI, SQLite, SQL Server, Oracle).
+il tool `check_syntax` per JSON, JSON5, JSONC, XML, HTML, YAML, TOML, INI,
+CSV/TSV, HCL, Markdown, `.env`, Properties, Protobuf, GraphQL, Dockerfile, jq,
+i linguaggi di programmazione Go, TypeScript/JavaScript (incl. JSX/TSX),
+Shell/Bash, Lua e Starlark, e SQL (MySQL, PostgreSQL, ANSI, SQLite, SQL Server,
+Oracle). Le verifiche sui linguaggi di programmazione sono **solo di parsing**
+(nessun type-check né risoluzione di import/nomi).
 
 **Regole obbligatorie:**
 
-1. Dopo aver creato o modificato un file `.json`, `.xml`, `.yml`/`.yaml`,
-   `.toml`, `.ini`/`.cfg`, `.csv`/`.tsv`, `.hcl`/`.tf`, `.md`, `.env`,
-   `.properties` o `.sql`, invoca SEMPRE `check_syntax` sul file prima di
-   considerare il task concluso.
+1. Dopo aver creato o modificato un file `.json`/`.json5`/`.jsonc`, `.xml`,
+   `.html`/`.htm`, `.yml`/`.yaml`, `.toml`, `.ini`/`.cfg`, `.csv`/`.tsv`,
+   `.hcl`/`.tf`, `.md`, `.env`, `.properties`, `.proto`, `.graphql`/`.gql`,
+   `Dockerfile`, `.jq`, `.go`, `.ts`/`.tsx`, `.js`/`.mjs`/`.cjs`/`.jsx`,
+   `.lua`, `.sh`/`.bash`, `.star`/`.bzl` o `.sql`, invoca SEMPRE `check_syntax`
+   sul file prima di considerare il task concluso.
 2. Per i file `.sql` passa SEMPRE il parametro `type` con il dialetto corretto
    (`sql:mysql`, `sql:postgres`, `sql:ansi`, `sql:sqlite`, `sql:mssql`,
    `sql:oracle`). L'auto-detect non sceglie dialetti SQL.
