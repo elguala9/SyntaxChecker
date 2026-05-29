@@ -10,7 +10,7 @@ This document is intended for an AI assistant (Claude, etc.) that needs to insta
 
 USE `check_syntax` when:
 - The user explicitly asks to validate/check a file's syntax.
-- You have just written or edited a JSON/JSON5/JSONC/XML/HTML/YAML/TOML/INI/CSV/HCL/Markdown/`.env`/Properties/Protobuf/GraphQL/Dockerfile/jq/SQL file and want to verify it before considering the task complete.
+- You have just written or edited a JSON/JSON5/JSONC/XML/HTML/YAML/TOML/INI/CSV/HCL/Markdown/`.env`/Properties/Protobuf/GraphQL/Dockerfile/jq/Go/TypeScript/JavaScript/Shell/Lua/Starlark/SQL file and want to verify it before considering the task complete.
 - You are debugging a parsing error in one of these formats.
 
 USE `check_syntax` with `schema` when:
@@ -29,18 +29,18 @@ DO NOT use it for:
 From the repo root, with Go 1.22+:
 
 ```
-make build
+mage build
 ```
 
 Produces:
 - `dist/syntax-checker(.exe)` — validation CLI.
 - `dist/syntaxchecker-mcp(.exe)` — MCP server (stdio transport).
 
-If `make` is not available (Windows without make):
+If Mage is not installed:
 
 ```
-cd apps/checker     && go build -o ../../dist/syntax-checker.exe .
-cd apps/mcp-server  && go build -o ../../dist/syntaxchecker-mcp.exe .
+go build -o dist/syntax-checker.exe ./apps/checker
+go build -o dist/syntaxchecker-mcp.exe ./apps/mcp-server
 ```
 
 ### 2. MCP client configuration

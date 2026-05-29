@@ -63,11 +63,14 @@ SyntaxChecker/
 
 Requires Go 1.22+ (workspace already configured in `go.work`).
 
+Builds use [Mage](https://magefile.org) (`go install github.com/magefile/mage@latest`):
+
 ```bash
-make build           # produces dist/syntax-checker(.exe) and dist/syntaxchecker-mcp(.exe)
-make test            # runs the unit tests
-make build-windows   # cross-build for Windows
-make build-linux     # cross-build for Linux
+mage build           # produces dist/syntax-checker(.exe) and dist/syntaxchecker-mcp(.exe)
+mage test            # runs the unit tests
+mage windows         # cross-build for Windows
+mage linux           # cross-build for Linux
+mage -l              # list all targets
 ```
 
 Binaries built with `CGO_ENABLED=0`, `-trimpath`, `-ldflags "-s -w"`.
