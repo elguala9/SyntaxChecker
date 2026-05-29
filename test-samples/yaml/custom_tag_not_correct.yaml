@@ -1,0 +1,6 @@
+# A custom (application-specific) tag is rejected in --strict mode:
+# it is not representable as portable YAML/JSON data.
+point: !Point
+  x: 1
+  y: 2
+name: example

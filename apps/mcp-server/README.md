@@ -9,18 +9,20 @@ output as structured content.
 `check_syntax(file_path, type?, schema?, strict?)`
 
 - `file_path` — path to the file (absolute or relative to the server's working directory).
-- `type` — optional; forces the type. If omitted, auto-detected from the extension.
-  Values: `json`, `json5`, `jsonc`, `xml`, `yaml`, `toml`, `ini`, `csv`, `tsv`,
-  `hcl`, `markdown`, `env`, `properties`, `proto`, `graphql`, `gql`, `sql:mysql`,
-  `sql:postgres`, `sql:ansi`, `sql:sqlite`, `sql:mssql`, `sql:oracle`.
-- `schema` — optional; path to a JSON Schema to validate the document against.
-  Supported for `json` and `yaml` only (XSD validation for XML is not supported).
+- `type` — optional; forces the type. If omitted, auto-detected from the extension
+  (or the file name for Dockerfiles).
+  Values: `json`, `json5`, `jsonc`, `xml`, `html`, `yaml`, `toml`, `ini`, `csv`, `tsv`,
+  `hcl`, `markdown`, `env`, `properties`, `proto`, `graphql`, `gql`, `dockerfile`,
+  `jq`, `go`, `ts`, `tsx`, `js`, `jsx`, `lua`, `shell`, `starlark`,
+  `sql:mysql`, `sql:postgres`, `sql:ansi`, `sql:sqlite`, `sql:mssql`, `sql:oracle`.
+- `schema` — optional; path to a JSON Schema (for `json`/`yaml`) or a DTD (for `xml`)
+  to validate the document against. XSD/RelaxNG are not supported.
 - `strict` — optional; enables stricter checks (e.g. duplicate JSON keys).
 
 ## Build
 
 ```
-make build        # produces dist/syntax-checker(.exe) and dist/syntaxchecker-mcp(.exe)
+mage build        # produces dist/syntax-checker(.exe) and dist/syntaxchecker-mcp(.exe)
 ```
 
 ## Resolving the syntax-checker executable

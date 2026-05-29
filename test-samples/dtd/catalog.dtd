@@ -1,0 +1,10 @@
+<!-- DTD for a book catalog: element-content, EMPTY and a #FIXED attribute -->
+<!ELEMENT catalog (book+)>
+<!ELEMENT book (title, author, cover)>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT author (#PCDATA)>
+<!ELEMENT cover EMPTY>
+<!ATTLIST book
+  id     ID                    #REQUIRED
+  format (hardcover|paperback) "paperback">
+<!ATTLIST catalog version CDATA #FIXED "1.0">
