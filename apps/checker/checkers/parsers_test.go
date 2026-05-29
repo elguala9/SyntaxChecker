@@ -65,6 +65,22 @@ func TestCSVRaggedLenient(t *testing.T) {
 	}
 }
 
+func TestCSVUnterminatedQuoteLenient(t *testing.T) {
+	errs := CSV{Comma: ','}.Check([]byte("id,name\n1,\"Alice\n2,Bob\n"), false)
+	if len(errs) == 0 {
+		t.Fatal("expected an unterminated-quote error even when not strict")
+	}
+	if errs[0].Line != 2 {
+		t.Errorf("expected error on line 2 where the quote opens, got %+v", errs[0])
+	}
+}
+
+func TestCSVEscapedQuotesValid(t *testing.T) {
+	if errs := (CSV{Comma: ','}).Check([]byte("a,b\n\"x \"\"y\"\" z\",2\n"), false); len(errs) != 0 {
+		t.Fatalf("doubled quotes inside a quoted field are valid, got %v", errs)
+	}
+}
+
 func TestTSVDelimiter(t *testing.T) {
 	if errs := (CSV{Comma: '\t'}).Check([]byte("a\tb\n1\t2\n"), true); len(errs) != 0 {
 		t.Fatalf("expected valid TSV, got %v", errs)

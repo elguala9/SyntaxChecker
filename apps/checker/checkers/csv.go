@@ -60,5 +60,60 @@ func (c CSV) Check(data []byte, strict bool) []result.SyntaxError {
 		errs = append(errs, result.SyntaxError{Message: cleanMessage(err.Error())})
 		break
 	}
+
+	// LazyQuotes (non-strict) tolerates stray quotes inside fields, but a quoted
+	// field that is never closed before the end of the file is always malformed.
+	// The lenient reader silently swallows it, so detect it explicitly here.
+	if !strict {
+		if line, ok := unterminatedQuoteLine(data, byte(comma)); ok {
+			errs = append(errs, result.SyntaxError{
+				Line:    line,
+				Message: "unterminated quoted field",
+			})
+		}
+	}
 	return errs
+}
+
+// unterminatedQuoteLine scans data and, if it ends while still inside a quoted
+// field, returns the 1-based line where that quote was opened. Doubled quotes
+// ("") inside a quoted field are treated as escaped and do not close it.
+func unterminatedQuoteLine(data []byte, comma byte) (int, bool) {
+	line, openLine := 1, 0
+	inQuote, atFieldStart := false, true
+	for i := 0; i < len(data); i++ {
+		ch := data[i]
+		if inQuote {
+			switch ch {
+			case '"':
+				if i+1 < len(data) && data[i+1] == '"' {
+					i++ // escaped quote, stay inside the field
+					continue
+				}
+				inQuote = false
+				atFieldStart = false
+			case '\n':
+				line++ // newlines are legal inside a quoted field
+			}
+			continue
+		}
+		switch ch {
+		case '"':
+			if atFieldStart {
+				inQuote = true
+				openLine = line
+			}
+			atFieldStart = false
+		case comma:
+			atFieldStart = true
+		case '\n':
+			line++
+			atFieldStart = true
+		case '\r':
+			atFieldStart = true
+		default:
+			atFieldStart = false
+		}
+	}
+	return openLine, inQuote
 }
