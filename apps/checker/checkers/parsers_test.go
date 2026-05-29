@@ -205,6 +205,67 @@ func TestJSONCMissingComma(t *testing.T) {
 	}
 }
 
+func TestHTMLWellFormed(t *testing.T) {
+	src := "<html><body><p>hi <b>bold</b></p><br><img src=\"x\"></body></html>"
+	if errs := (HTML{}).Check([]byte(src), true); len(errs) != 0 {
+		t.Fatalf("expected valid, got %v", errs)
+	}
+}
+
+func TestHTMLMismatchedTagStrict(t *testing.T) {
+	errs := HTML{}.Check([]byte("<div><span>x</div></span>"), true)
+	if len(errs) == 0 {
+		t.Fatal("expected a mismatched-tag error in strict mode")
+	}
+}
+
+func TestHTMLUnclosedTagStrict(t *testing.T) {
+	errs := HTML{}.Check([]byte("<div><p>text"), true)
+	if len(errs) == 0 {
+		t.Fatal("expected unclosed-element errors in strict mode")
+	}
+}
+
+func TestHTMLLenientAlwaysValid(t *testing.T) {
+	// Lenient mode mirrors the tolerant HTML5 parse: unbalanced tags are repaired.
+	if errs := (HTML{}).Check([]byte("<div><span>x</div></span>"), false); len(errs) != 0 {
+		t.Fatalf("lenient HTML must tolerate unbalanced tags, got %v", errs)
+	}
+}
+
+func TestDockerfileValid(t *testing.T) {
+	src := "FROM alpine:3.20\nRUN echo hi\nCMD [\"sh\"]\n"
+	if errs := (Dockerfile{}).Check([]byte(src), false); len(errs) != 0 {
+		t.Fatalf("expected valid, got %v", errs)
+	}
+}
+
+func TestDockerfileUnknownInstruction(t *testing.T) {
+	errs := Dockerfile{}.Check([]byte("FROM alpine\nFROOM ubuntu\n"), false)
+	if len(errs) == 0 {
+		t.Fatal("expected an error for the unknown instruction")
+	}
+	if errs[0].Line == 0 {
+		t.Errorf("expected a line number, got %+v", errs[0])
+	}
+}
+
+func TestJQValid(t *testing.T) {
+	if errs := (JQ{}).Check([]byte(".a | map(.b) | add\n"), false); len(errs) != 0 {
+		t.Fatalf("expected valid, got %v", errs)
+	}
+}
+
+func TestJQErrorPosition(t *testing.T) {
+	errs := JQ{}.Check([]byte(".a | | .b\n"), false)
+	if len(errs) == 0 {
+		t.Fatal("expected an error")
+	}
+	if errs[0].Line == 0 {
+		t.Errorf("expected a line number, got %+v", errs[0])
+	}
+}
+
 // --- Self-discovering end-to-end test over test-samples ---------------------
 
 // validatorByExt returns the Validator for a sample file extension, and whether
@@ -235,6 +296,12 @@ func validatorByExt(ext string) (Validator, bool) {
 		return JSON5{}, true
 	case ".jsonc":
 		return JSONC{}, true
+	case ".html", ".htm":
+		return HTML{}, true
+	case ".dockerfile":
+		return Dockerfile{}, true
+	case ".jq":
+		return JQ{}, true
 	default:
 		return nil, false
 	}
@@ -246,7 +313,7 @@ func validatorByExt(ext string) (Validator, bool) {
 // Strict mode is used so format-specific strict checks are exercised.
 func TestParserSamples(t *testing.T) {
 	root := filepath.Join("..", "..", "..", "test-samples")
-	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto", "graphql", "json5", "jsonc"}
+	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto", "graphql", "json5", "jsonc", "html", "dockerfile", "jq"}
 
 	for _, d := range dirs {
 		entries, err := os.ReadDir(filepath.Join(root, d))
@@ -260,6 +327,12 @@ func TestParserSamples(t *testing.T) {
 			}
 			name := e.Name()
 			v, ok := validatorByExt(strings.ToLower(filepath.Ext(name)))
+			if !ok {
+				// Extension-less Dockerfiles are matched by name.
+				if base := strings.ToLower(name); base == "dockerfile" || base == "containerfile" {
+					v, ok = Dockerfile{}, true
+				}
+			}
 			if !ok {
 				continue
 			}

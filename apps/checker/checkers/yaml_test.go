@@ -23,6 +23,30 @@ func TestYAMLDuplicateKeys(t *testing.T) {
 	}
 }
 
+func TestYAMLCustomTagStrict(t *testing.T) {
+	errs := YAML{}.Check([]byte("p: !Point [1, 2]\nname: x\n"), true)
+	if len(errs) == 0 {
+		t.Fatal("expected a custom-tag error in strict mode")
+	}
+	if errs[0].Line == 0 {
+		t.Errorf("expected a line number, got %+v", errs[0])
+	}
+}
+
+func TestYAMLCustomTagLenient(t *testing.T) {
+	if errs := (YAML{}).Check([]byte("p: !Point [1, 2]\n"), false); len(errs) != 0 {
+		t.Fatalf("lenient mode must accept custom tags, got %v", errs)
+	}
+}
+
+func TestYAMLStandardTagsStrict(t *testing.T) {
+	// Explicit standard tags and anchors/aliases stay valid in strict mode.
+	src := "a: &x 1\nb: *x\nc: !!str 7\n"
+	if errs := (YAML{}).Check([]byte(src), true); len(errs) != 0 {
+		t.Fatalf("standard tags and anchors must be valid, got %v", errs)
+	}
+}
+
 const yamlSchema = `{
   "type": "object",
   "required": ["name", "age"],
