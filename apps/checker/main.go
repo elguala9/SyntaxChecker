@@ -137,6 +137,8 @@ func detectType(file string, data []byte) string {
 	case base == "dockerfile", base == "containerfile",
 		strings.HasPrefix(base, "dockerfile."), strings.HasSuffix(base, ".dockerfile"):
 		return "dockerfile"
+	case base == "build.bazel", base == "workspace.bazel":
+		return "starlark"
 	}
 
 	switch strings.ToLower(filepath.Ext(file)) {
@@ -156,6 +158,22 @@ func detectType(file string, data []byte) string {
 		return "html"
 	case ".jq":
 		return "jq"
+	case ".go":
+		return "go"
+	case ".ts":
+		return "ts"
+	case ".tsx":
+		return "tsx"
+	case ".js", ".mjs", ".cjs":
+		return "js"
+	case ".jsx":
+		return "jsx"
+	case ".lua":
+		return "lua"
+	case ".sh", ".bash":
+		return "shell"
+	case ".star", ".bzl":
+		return "starlark"
 	case ".yml", ".yaml":
 		return "yaml"
 	case ".toml":
@@ -302,6 +320,22 @@ func validatorFor(typ string) (checkers.Validator, error) {
 		return checkers.Dockerfile{}, nil
 	case "jq":
 		return checkers.JQ{}, nil
+	case "go", "golang":
+		return checkers.Go{}, nil
+	case "ts", "typescript":
+		return checkers.JS{Dialect: "ts"}, nil
+	case "tsx":
+		return checkers.JS{Dialect: "tsx"}, nil
+	case "js", "javascript":
+		return checkers.JS{Dialect: "js"}, nil
+	case "jsx":
+		return checkers.JS{Dialect: "jsx"}, nil
+	case "lua":
+		return checkers.Lua{}, nil
+	case "shell", "bash", "sh":
+		return checkers.Shell{}, nil
+	case "starlark", "bzl":
+		return checkers.Starlark{}, nil
 	case "yaml":
 		return checkers.YAML{}, nil
 	case "toml":

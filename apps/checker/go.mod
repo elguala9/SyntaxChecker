@@ -1,10 +1,11 @@
 module github.com/parresia/syntaxchecker/apps/checker
 
-go 1.25.0
+go 1.25.5
 
 require (
 	github.com/antlr4-go/antlr/v4 v4.13.1
 	github.com/bytebase/parser v0.0.0-20260417075056-57b6ef7a2640
+	github.com/evanw/esbuild v0.28.0
 	github.com/hashicorp/hcl/v2 v2.24.0
 	github.com/itchyny/gojq v0.12.19
 	github.com/joho/godotenv v1.5.1
@@ -21,9 +22,12 @@ require (
 	github.com/wasilibs/go-pgquery v0.0.0-20260526011917-40df1ddb6e56
 	github.com/yoheimuta/go-protoparser/v4 v4.14.2
 	github.com/yuin/goldmark v1.8.2
+	github.com/yuin/gopher-lua v1.1.2
+	go.starlark.net v0.0.0-20260522144826-ec58d4b459e2
 	golang.org/x/net v0.55.0
 	gopkg.in/ini.v1 v1.67.2
 	gopkg.in/yaml.v3 v3.0.1
+	mvdan.cc/sh/v3 v3.13.1
 )
 
 require (

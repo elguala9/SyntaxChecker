@@ -302,6 +302,22 @@ func validatorByExt(ext string) (Validator, bool) {
 		return Dockerfile{}, true
 	case ".jq":
 		return JQ{}, true
+	case ".go":
+		return Go{}, true
+	case ".ts":
+		return JS{Dialect: "ts"}, true
+	case ".tsx":
+		return JS{Dialect: "tsx"}, true
+	case ".js", ".mjs", ".cjs":
+		return JS{Dialect: "js"}, true
+	case ".jsx":
+		return JS{Dialect: "jsx"}, true
+	case ".lua":
+		return Lua{}, true
+	case ".sh", ".bash":
+		return Shell{}, true
+	case ".star", ".bzl":
+		return Starlark{}, true
 	default:
 		return nil, false
 	}
@@ -313,7 +329,7 @@ func validatorByExt(ext string) (Validator, bool) {
 // Strict mode is used so format-specific strict checks are exercised.
 func TestParserSamples(t *testing.T) {
 	root := filepath.Join("..", "..", "..", "test-samples")
-	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto", "graphql", "json5", "jsonc", "html", "dockerfile", "jq"}
+	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto", "graphql", "json5", "jsonc", "html", "dockerfile", "jq", "go", "ts", "js", "lua", "shell", "starlark"}
 
 	for _, d := range dirs {
 		entries, err := os.ReadDir(filepath.Join(root, d))
