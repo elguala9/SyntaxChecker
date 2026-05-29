@@ -152,6 +152,28 @@ func TestProtobufErrorPosition(t *testing.T) {
 	}
 }
 
+func TestGraphQLSchemaValid(t *testing.T) {
+	if errs := (GraphQL{}).Check([]byte("type Query {\n  hello: String\n}\n"), false); len(errs) != 0 {
+		t.Fatalf("expected valid schema, got %v", errs)
+	}
+}
+
+func TestGraphQLQueryValid(t *testing.T) {
+	if errs := (GraphQL{}).Check([]byte("{ user(id: 1) { name } }\n"), false); len(errs) != 0 {
+		t.Fatalf("expected valid query, got %v", errs)
+	}
+}
+
+func TestGraphQLErrorPosition(t *testing.T) {
+	errs := GraphQL{}.Check([]byte("query { user(id: 1) { name }\n"), false)
+	if len(errs) == 0 {
+		t.Fatal("expected an error for the unbalanced braces")
+	}
+	if errs[0].Line == 0 {
+		t.Errorf("expected a line number, got %+v", errs[0])
+	}
+}
+
 // --- Self-discovering end-to-end test over test-samples ---------------------
 
 // validatorByExt returns the Validator for a sample file extension, and whether
@@ -176,6 +198,8 @@ func validatorByExt(ext string) (Validator, bool) {
 		return Properties{}, true
 	case ".proto":
 		return Protobuf{}, true
+	case ".graphql", ".gql":
+		return GraphQL{}, true
 	default:
 		return nil, false
 	}
@@ -187,7 +211,7 @@ func validatorByExt(ext string) (Validator, bool) {
 // Strict mode is used so format-specific strict checks are exercised.
 func TestParserSamples(t *testing.T) {
 	root := filepath.Join("..", "..", "..", "test-samples")
-	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto"}
+	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto", "graphql"}
 
 	for _, d := range dirs {
 		entries, err := os.ReadDir(filepath.Join(root, d))

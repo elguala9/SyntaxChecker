@@ -137,6 +137,8 @@ func detectType(file string, data []byte) string {
 		return "json"
 	case ".proto":
 		return "proto"
+	case ".graphql", ".gql":
+		return "graphql"
 	case ".xml", ".xhtml":
 		return "xml"
 	case ".yml", ".yaml":
@@ -261,6 +263,8 @@ func validatorFor(typ string) (checkers.Validator, error) {
 		return checkers.JSON{}, nil
 	case "proto", "protobuf":
 		return checkers.Protobuf{}, nil
+	case "graphql", "gql":
+		return checkers.GraphQL{}, nil
 	case "sql:mysql":
 		return checkers.MySQL{}, nil
 	case "sql:postgres", "sql:postgresql", "sql:ansi":

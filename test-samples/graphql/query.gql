@@ -1,0 +1,8 @@
+query GetUser($id: ID!) {
+  user(input: { id: $id }) {
+    id
+    email
+    roles
+    status
+  }
+}

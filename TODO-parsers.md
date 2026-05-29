@@ -36,7 +36,7 @@ Più lavoro su mapping errori / posizione (riga/colonna).
 
 - [ ] **JSON5 / JSONC** — `.json5`, `.jsonc` — JSON con commenti/trailing comma
 - [ ] **HTML** — `.html` — lib: `golang.org/x/net/html` (tollerante) o validatore strict
-- [ ] **GraphQL** — `.graphql`, `.gql` — lib: `vektah/gqlparser`
+- [x] **GraphQL** — `.graphql`, `.gql` — lib: `vektah/gqlparser/v2` (valido se parsa come schema SDL o come query)
 - [x] **Protobuf** — `.proto` — lib: `github.com/yoheimuta/go-protoparser/v4` (modalità non-permissive)
 - [ ] **Dockerfile** — `Dockerfile` — lib: `moby/buildkit` frontend parser
 - [ ] **JSONPath / JQ** — espressioni — validazione sintassi query
