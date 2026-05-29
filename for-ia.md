@@ -4,13 +4,13 @@ This document is intended for an AI assistant (Claude, etc.) that needs to insta
 
 ## What it is
 
-`syntaxchecker` is an MCP server that exposes a single tool, `check_syntax`, capable of validating files in JSON, XML, YAML and SQL (MySQL, PostgreSQL/ANSI, SQLite, SQL Server, Oracle). Use it when the user asks you to **verify the syntax** of a code/configuration file, or when you have just produced a file and want to confirm its validity before delivering it.
+`syntaxchecker` is an MCP server that exposes a single tool, `check_syntax`, capable of validating files in JSON, XML, YAML, TOML, INI, CSV/TSV, HCL, Markdown, `.env`, Java Properties and SQL (MySQL, PostgreSQL/ANSI, SQLite, SQL Server, Oracle). Use it when the user asks you to **verify the syntax** of a code/configuration file, or when you have just produced a file and want to confirm its validity before delivering it.
 
 ## When to use it
 
 USE `check_syntax` when:
 - The user explicitly asks to validate/check a file's syntax.
-- You have just written or edited a JSON/XML/YAML/SQL file and want to verify it before considering the task complete.
+- You have just written or edited a JSON/XML/YAML/TOML/INI/CSV/HCL/Markdown/`.env`/Properties/SQL file and want to verify it before considering the task complete.
 - You are debugging a parsing error in one of these formats.
 
 USE `check_syntax` with `schema` when:
@@ -107,13 +107,14 @@ check_syntax(file_path: string, type?: string, schema?: string, strict?: boolean
 ### Parameters
 
 - **`file_path`** (required) — path to the file. Absolute or relative to the server's working directory. Prefer absolute paths to avoid ambiguity.
-- **`type`** (optional) — forces the type. If omitted, the checker auto-detects from the extension (`.json`, `.xml`, `.yml`/`.yaml`, `.sql`).
+- **`type`** (optional) — forces the type. If omitted, the checker auto-detects from the extension (`.json`, `.xml`, `.yml`/`.yaml`, `.toml`, `.ini`/`.cfg`, `.csv`, `.tsv`, `.hcl`/`.tf`, `.md`/`.markdown`, `.env`, `.properties`, `.sql`).
   - **Important for `.sql`**: auto-detect does NOT know which dialect to use. For SQL files **you must always pass `type`** with the correct dialect, otherwise the checker fails or uses an unwanted default.
-  - Valid values: `json`, `xml`, `yaml`, `sql:mysql`, `sql:postgres` (alias `sql:postgresql`), `sql:ansi`, `sql:sqlite`, `sql:mssql` (alias `sql:tsql`), `sql:oracle` (alias `sql:plsql`).
+  - Valid values: `json`, `xml`, `yaml`, `toml`, `ini`, `csv`, `tsv`, `hcl`, `markdown`, `env`, `properties`, `sql:mysql`, `sql:postgres` (alias `sql:postgresql`), `sql:ansi`, `sql:sqlite`, `sql:mssql` (alias `sql:tsql`), `sql:oracle` (alias `sql:plsql`).
 - **`schema`** (optional) — path to a JSON Schema (drafts up to 2020-12, including draft-07) to validate the document against. Supported for `json` and `yaml` only. Passing it for an XML file returns an error (XSD validation is not supported). Violations are reported by instance location (a JSON pointer like `/items/0/name`), not by source line.
   - **`format` is annotation-only** (e.g. `email`, `date` are NOT enforced); structural keywords (`type`, `required`, `enum`, `pattern`, ranges, `oneOf`, `$ref`, …) ARE enforced. Do not assume a malformed email fails validation.
-- **`strict`** (optional, bool) — enables stricter checks. Known effect:
+- **`strict`** (optional, bool) — enables stricter checks. Known effects:
   - JSON: detects duplicate keys (otherwise silently ignored by the standard parser).
+  - CSV/TSV: enforces a consistent field count across rows (ragged rows are tolerated without it) and rejects lazy quoting.
   - Other formats: no effect for now, but passing `true` is harmless.
 
 ### Call examples
@@ -144,7 +145,7 @@ Structured content with this shape:
 ```
 
 - `valid: true` → file is syntactically correct. `errors` absent or empty.
-- `valid: false` → at least one error. Every `errors[i]` always has `message`; `line`/`column` may be missing (e.g. YAML does not expose `column`; XML does not expose `column`).
+- `valid: false` → at least one error. Every `errors[i]` always has `message`; `line`/`column` may be missing. TOML, CSV/TSV and HCL report both `line` and `column`; YAML and XML report `line` only; `.env`, INI, Properties and Markdown may report neither.
 
 ## How to interpret results
 

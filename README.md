@@ -9,6 +9,14 @@ Multi-format syntax validator, shipped as a CLI (`syntax-checker`) and as an MCP
 | JSON | `json` | `--strict` detects duplicate keys; `--schema` validates against a JSON Schema |
 | XML | `xml` | Well-formedness only (no DTD/XSD validation — see below) |
 | YAML | `yaml` | `.yml` and `.yaml`; `--schema` validates against a JSON Schema |
+| TOML | `toml` | `.toml`; reports line/column, including duplicate keys |
+| INI | `ini` | `.ini`, `.cfg` |
+| CSV | `csv` | `.csv`; `--strict` enforces a consistent field count per row |
+| TSV | `tsv` | `.tsv`; tab-delimited, same checks as CSV |
+| HCL | `hcl` | `.hcl`, `.tf` (Terraform); well-formedness only |
+| Markdown | `markdown` | `.md`, `.markdown`; parse-only (Markdown has no invalid syntax) |
+| .env | `env` | `.env`; KEY=VALUE assignments |
+| Properties | `properties` | `.properties`; reports malformed `\uXXXX` escapes and circular `${...}` refs |
 | SQL MySQL | `sql:mysql` | TiDB parser |
 | SQL PostgreSQL | `sql:postgres` / `sql:postgresql` | Official parser via WASM |
 | SQL ANSI | `sql:ansi` | Mapped to the PostgreSQL parser |
@@ -119,5 +127,6 @@ This is negligible for interactive use; for high throughput the MCP server could
 ## Status
 
 Phase 1 (CLI) and Phase 2 (MCP server) completed, plus JSON Schema validation
-for JSON and YAML. Out-of-scope backlog: XSD for XML, assertive `format`
-validation, TOML, CSV, INI, ENV, HTML, Dockerfile, XHTML.
+for JSON and YAML and the simple-format parsers (TOML, INI, CSV/TSV, HCL,
+Markdown, .env, Properties). Out-of-scope backlog: XSD for XML, assertive
+`format` validation, JSON5/JSONC, HTML, GraphQL, Protobuf, Dockerfile.
