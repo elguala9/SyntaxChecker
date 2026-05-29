@@ -1,0 +1,6 @@
+{
+  // missing closing bracket for the array
+  features: [
+    'json5',
+    'jsonc',
+}

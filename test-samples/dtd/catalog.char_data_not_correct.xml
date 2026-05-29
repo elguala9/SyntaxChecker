@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<catalog version="1.0">
+  stray text is not allowed in element-content
+  <book id="b1">
+    <title>Effective Go</title>
+    <author>The Go Authors</author>
+    <cover/>
+  </book>
+</catalog>

@@ -7,14 +7,44 @@ Multi-format syntax validator, shipped as a CLI (`syntax-checker`) and as an MCP
 | Kind | `--type` | Notes |
 |---|---|---|
 | JSON | `json` | `--strict` detects duplicate keys; `--schema` validates against a JSON Schema |
-| XML | `xml` | Well-formedness only (no DTD/XSD validation — see below) |
-| YAML | `yaml` | `.yml` and `.yaml`; `--schema` validates against a JSON Schema |
+| JSON5 | `json5` | `.json5`; comments, trailing commas, single quotes, unquoted keys, hex/Infinity/NaN |
+| JSONC | `jsonc` | `.jsonc`; JSON with comments and trailing commas (stripped, then validated as JSON) |
+| XML | `xml` | Well-formedness; `--schema` validates against a DTD (no XSD/RelaxNG — see below) |
+| HTML | `html` / `htm` | `.html`, `.htm`; lenient parse (tolerant, like Markdown); `--strict` enforces XHTML-style balanced/nested tags |
+| YAML | `yaml` | `.yml` and `.yaml`; `--strict` rejects custom tags; `--schema` validates against a JSON Schema |
+| TOML | `toml` | `.toml`; reports line/column, including duplicate keys |
+| INI | `ini` | `.ini`, `.cfg` |
+| CSV | `csv` | `.csv`; `--strict` enforces a consistent field count per row |
+| TSV | `tsv` | `.tsv`; tab-delimited, same checks as CSV |
+| HCL | `hcl` | `.hcl`, `.tf` (Terraform); well-formedness only |
+| Markdown | `markdown` | `.md`, `.markdown`; parse-only (Markdown has no invalid syntax) |
+| .env | `env` | `.env`; KEY=VALUE assignments |
+| Properties | `properties` | `.properties`; reports malformed `\uXXXX` escapes and circular `${...}` refs |
+| Protobuf | `proto` | `.proto`; non-permissive well-formedness (no import/type resolution) |
+| GraphQL | `graphql` / `gql` | `.graphql`, `.gql`; valid as either an SDL schema or an executable document |
+| Dockerfile | `dockerfile` | `Dockerfile`, `Containerfile`, `*.dockerfile`; structural parse + unknown-instruction/argument checks |
+| jq | `jq` | `.jq`; jq program syntax (parse-only) |
+| Go | `go` / `golang` | `.go`; stdlib `go/parser` (parse-only, no type-check; file must start with a package clause) |
+| TypeScript | `ts` / `typescript`, `tsx` | `.ts`, `.tsx`; esbuild parser (parse-only, no type-check) |
+| JavaScript | `js` / `javascript`, `jsx` | `.js`, `.mjs`, `.cjs`, `.jsx`; esbuild parser |
+| Shell | `shell` / `bash` / `sh` | `.sh`, `.bash`; Bash-mode parse via `mvdan.cc/sh` (parse-only) |
+| Lua | `lua` | `.lua`; Lua 5.1 parse via gopher-lua (parse-only) |
+| Starlark | `starlark` / `bzl` | `.star`, `.bzl`, `BUILD.bazel`, `WORKSPACE.bazel`; go.starlark.net parser |
 | SQL MySQL | `sql:mysql` | TiDB parser |
 | SQL PostgreSQL | `sql:postgres` / `sql:postgresql` | Official parser via WASM |
 | SQL ANSI | `sql:ansi` | Mapped to the PostgreSQL parser |
 | SQL SQLite | `sql:sqlite` | rqlite/sql |
 | SQL SQL Server | `sql:mssql` / `sql:tsql` | ANTLR4 |
 | SQL Oracle | `sql:oracle` / `sql:plsql` | ANTLR4 |
+
+Across `test-samples/`, files whose name contains `_not_correct` are expected to
+fail. Some of them only fail under `--strict`, because the format's lenient mode
+accepts the input by design — notably `html/stray_close_not_correct.html`
+(unbalanced tags are silently repaired by the tolerant HTML5 parse) and
+`yaml/custom_tag_not_correct.yaml` (custom tags are valid YAML, rejected only in
+strict). The test suite always checks samples in strict mode, so these still
+validate the parsers; when probing a file by hand (CLI or MCP) without `--strict`
+it may report valid.
 
 ## Layout
 
@@ -33,11 +63,14 @@ SyntaxChecker/
 
 Requires Go 1.22+ (workspace already configured in `go.work`).
 
+Builds use [Mage](https://magefile.org) (`go install github.com/magefile/mage@latest`):
+
 ```bash
-make build           # produces dist/syntax-checker(.exe) and dist/syntaxchecker-mcp(.exe)
-make test            # runs the unit tests
-make build-windows   # cross-build for Windows
-make build-linux     # cross-build for Linux
+mage build           # produces dist/syntax-checker(.exe) and dist/syntaxchecker-mcp(.exe)
+mage test            # runs the unit tests
+mage windows         # cross-build for Windows
+mage linux           # cross-build for Linux
+mage -l              # list all targets
 ```
 
 Binaries built with `CGO_ENABLED=0`, `-trimpath`, `-ldflags "-s -w"`.
@@ -62,12 +95,11 @@ Exit codes: `0` valid, `1` syntax errors, `2` internal error / file not found.
 
 ### Schema validation
 
-`--schema` validates the document against a [JSON Schema](https://json-schema.org/)
-(drafts up to 2020-12, including draft-07, via `santhosh-tekuri/jsonschema`). It
-is supported for `json` and `yaml` (YAML maps onto the same data model as JSON).
-Schema violations are reported by their instance location (a JSON pointer such
-as `/items/0/name`) rather than a source line, since validation runs on the
-decoded value.
+For `json` and `yaml`, `--schema` validates against a [JSON Schema](https://json-schema.org/)
+(drafts up to 2020-12, including draft-07, via `santhosh-tekuri/jsonschema`;
+YAML maps onto the same data model as JSON). Schema violations are reported by
+their instance location (a JSON pointer such as `/items/0/name`) rather than a
+source line, since validation runs on the decoded value.
 
 `format` keywords (e.g. `email`, `date`) are treated as annotations only, per
 the JSON Schema 2020-12 default — they do not cause validation failures.
@@ -75,17 +107,23 @@ Structural keywords (`type`, `required`, `enum`, `const`, `pattern`,
 `minimum`/`maximum`, `minItems`, `uniqueItems`, `additionalProperties`,
 `oneOf`/`anyOf`, `$ref`, …) are fully enforced.
 
-XSD validation for XML is **not supported**: there is no mature pure-Go XSD
-validator, and the only production-grade option (cgo + libxml2) would require a
-native library, breaking the self-contained static binary. Requesting `--schema`
-for an XML file returns an error.
+For `xml`, `--schema` validates against a **DTD**. The validator checks that
+every element is declared, that child elements are permitted by the parent's
+content model (membership; `EMPTY` and element-content vs `#PCDATA`), that
+`#REQUIRED`/`#FIXED`/enumerated attributes are satisfied, and that attributes
+are declared. It does not enforce content-model order/cardinality, expand
+entities, or resolve ID/IDREF. **XSD and RelaxNG are not supported**: there is no
+mature pure-Go implementation, and the only production-grade option
+(cgo + libxml2) would require a native library, breaking the self-contained
+static binary.
 
-Sample schemas and documents (valid and invalid) live under
-[`test-samples/schema/`](test-samples/schema). Each document `<topic>.<variant>.<ext>`
-is paired with its sibling `<topic>.schema.json`; files whose name contains
-`_not_correct` are expected to fail. They are exercised by the Go test
-`apps/checker/checkers/schema_samples_test.go` and end-to-end by
-`scripts/check-samples.ps1`.
+Sample JSON Schema documents live under
+[`test-samples/schema/`](test-samples/schema) (`<topic>.<variant>.<ext>` paired
+with `<topic>.schema.json`); DTD samples live under
+[`test-samples/dtd/`](test-samples/dtd) (`<topic>.<variant>.xml` paired with
+`<topic>.dtd`). Files whose name contains `_not_correct` are expected to fail.
+They are exercised by `apps/checker/checkers/schema_samples_test.go` and
+`xml_dtd_test.go`, and end-to-end by `scripts/check-samples.ps1`.
 
 ## MCP usage
 
@@ -119,5 +157,11 @@ This is negligible for interactive use; for high throughput the MCP server could
 ## Status
 
 Phase 1 (CLI) and Phase 2 (MCP server) completed, plus JSON Schema validation
-for JSON and YAML. Out-of-scope backlog: XSD for XML, assertive `format`
-validation, TOML, CSV, INI, ENV, HTML, Dockerfile, XHTML.
+for JSON and YAML, DTD validation for XML, the simple-format parsers (TOML, INI,
+CSV/TSV, HCL, Markdown, .env, Properties) and the medium-format parsers
+(JSON5/JSONC, Protobuf, GraphQL, HTML, Dockerfile, jq) and the first
+programming-language parsers (Go, TypeScript/JavaScript, Shell, Lua, Starlark —
+all pure-Go, parse-only; see `TODO-languages.md` for the feasibility of others).
+Out-of-scope: XSD/RelaxNG for XML (cgo/libxml2 would break the static binary),
+assertive `format` validation, JSONPath, and languages that require cgo/native
+toolchains (C/C++, etc. — see `TODO-languages.md`).

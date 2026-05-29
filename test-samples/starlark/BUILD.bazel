@@ -1,0 +1,20 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+PACKAGE_DEPS = [
+    "//pkg/result",
+    "//pkg/checkers",
+]
+
+go_library(
+    name = "checker_lib",
+    srcs = glob(["*.go"], exclude = ["*_test.go"]),
+    importpath = "github.com/parresia/syntaxchecker/apps/checker",
+    visibility = ["//visibility:private"],
+    deps = PACKAGE_DEPS,
+)
+
+go_binary(
+    name = "checker",
+    embed = [":checker_lib"],
+    visibility = ["//visibility:public"],
+)
