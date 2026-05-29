@@ -139,6 +139,22 @@ func detectType(file string, data []byte) string {
 		return "xml"
 	case ".yml", ".yaml":
 		return "yaml"
+	case ".toml":
+		return "toml"
+	case ".ini", ".cfg":
+		return "ini"
+	case ".csv":
+		return "csv"
+	case ".tsv":
+		return "tsv"
+	case ".hcl", ".tf":
+		return "hcl"
+	case ".md", ".markdown":
+		return "markdown"
+	case ".env":
+		return "env"
+	case ".properties":
+		return "properties"
 	case ".sql":
 		return detectSQLDialect(file, data)
 	default:
@@ -255,6 +271,22 @@ func validatorFor(typ string) (checkers.Validator, error) {
 		return checkers.XML{}, nil
 	case "yaml":
 		return checkers.YAML{}, nil
+	case "toml":
+		return checkers.TOML{}, nil
+	case "ini":
+		return checkers.INI{}, nil
+	case "csv":
+		return checkers.CSV{Comma: ','}, nil
+	case "tsv":
+		return checkers.CSV{Comma: '\t'}, nil
+	case "hcl":
+		return checkers.HCL{}, nil
+	case "markdown":
+		return checkers.Markdown{}, nil
+	case "env":
+		return checkers.Env{}, nil
+	case "properties":
+		return checkers.Properties{}, nil
 	default:
 		return nil, fmt.Errorf("unsupported type %q", typ)
 	}

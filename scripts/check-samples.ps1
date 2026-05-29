@@ -40,6 +40,17 @@ function Resolve-Type([System.IO.FileInfo]$file) {
     ".xhtml" { return "xml" }
     ".yaml"  { return "yaml" }
     ".yml"   { return "yaml" }
+    ".toml"  { return "toml" }
+    ".ini"   { return "ini" }
+    ".cfg"   { return "ini" }
+    ".csv"   { return "csv" }
+    ".tsv"   { return "tsv" }
+    ".hcl"   { return "hcl" }
+    ".tf"    { return "hcl" }
+    ".md"       { return "markdown" }
+    ".markdown" { return "markdown" }
+    ".env"        { return "env" }
+    ".properties" { return "properties" }
     default { return $null }  # no checker for this extension yet
   }
 }
