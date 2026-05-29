@@ -23,8 +23,8 @@ import (
 // CheckInput is the argument schema for the check_syntax tool.
 type CheckInput struct {
 	FilePath string `json:"file_path" jsonschema:"path of the file to check (absolute, or relative to the server's working directory)"`
-	Type     string `json:"type,omitempty" jsonschema:"forced type: json, json5, jsonc, xml, yaml, toml, ini, csv, tsv, hcl, markdown, env, properties, proto, graphql, sql:mysql, sql:postgres, sql:ansi, sql:sqlite, sql:mssql, sql:oracle; empty means auto-detect from the extension"`
-	Schema   string `json:"schema,omitempty" jsonschema:"path of a JSON Schema to validate the document against; supported for json and yaml only"`
+	Type     string `json:"type,omitempty" jsonschema:"forced type: json, json5, jsonc, xml, html, yaml, toml, ini, csv, tsv, hcl, markdown, env, properties, proto, graphql, dockerfile, jq, sql:mysql, sql:postgres, sql:ansi, sql:sqlite, sql:mssql, sql:oracle; empty means auto-detect from the extension"`
+	Schema   string `json:"schema,omitempty" jsonschema:"path of a JSON Schema (json, yaml) or a DTD (xml) to validate the document against"`
 	Strict   bool   `json:"strict,omitempty" jsonschema:"enable stricter checks where supported (e.g. JSON duplicate keys)"`
 }
 
@@ -39,7 +39,7 @@ func main() {
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "check_syntax",
-		Description: "Validate the syntax of a file (JSON, JSON5, JSONC, XML, YAML, TOML, INI, CSV/TSV, HCL, Markdown, .env, Properties, Protobuf, GraphQL, or SQL). Optionally validate JSON or YAML against a JSON Schema by passing the 'schema' path. Returns whether the file is valid and the list of syntax errors with line/column when available.",
+		Description: "Validate the syntax of a file (JSON, JSON5, JSONC, XML, HTML, YAML, TOML, INI, CSV/TSV, HCL, Markdown, .env, Properties, Protobuf, GraphQL, Dockerfile, jq, or SQL). Optionally validate JSON/YAML against a JSON Schema or XML against a DTD by passing the 'schema' path. Returns whether the file is valid and the list of syntax errors with line/column when available.",
 	}, checkSyntax)
 
 	// stdin EOF (client disconnect) is a normal shutdown, not a failure.

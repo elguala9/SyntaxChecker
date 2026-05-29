@@ -35,12 +35,14 @@ Parser maturi o stdlib, mapping errori semplice.
 Più lavoro su mapping errori / posizione (riga/colonna).
 
 - [x] **JSON5 / JSONC** — `.json5`, `.jsonc` — lib: `titanous/json5` (JSON5), `tidwall/jsonc` (JSONC→JSON, poi riuso `JSON{}`)
-- [ ] **HTML** — `.html` — lib: `golang.org/x/net/html` (tollerante) o validatore strict
+- [x] **HTML** — `.html`, `.htm` — lib: `golang.org/x/net/html`. Lenient = parse tollerante HTML5 (di fatto sempre valido, come Markdown); `--strict` = well-formedness in stile XHTML (tag bilanciati/annidati, void element gestiti). Vedi `html.go`.
 - [x] **GraphQL** — `.graphql`, `.gql` — lib: `vektah/gqlparser/v2` (valido se parsa come schema SDL o come query)
 - [x] **Protobuf** — `.proto` — lib: `github.com/yoheimuta/go-protoparser/v4` (modalità non-permissive)
-- [ ] **Dockerfile** — `Dockerfile` — lib: `moby/buildkit` frontend parser
-- [ ] **JSONPath / JQ** — espressioni — validazione sintassi query
+- [x] **Dockerfile** — `Dockerfile`, `Containerfile`, `*.dockerfile` — lib: `moby/buildkit` frontend parser (parse strutturale + `instructions.ParseInstruction` per istruzioni sconosciute/argomenti malformati). Rilevamento per nome file in `detectType`. Vedi `dockerfile.go`.
+- [x] **JQ** — `.jq` — lib: `github.com/itchyny/gojq` (parse-only delle espressioni). Vedi `jq.go`.
+  - **JSONPath**: fuori scope — nessuna libreria Go matura con semantica standardizzata univoca; le espressioni non sono un formato-file tipico per questo tool.
 
 ## Estensioni dei formati esistenti
-- [ ] **XML + XSD / DTD / RelaxNG** — implementare `SchemaValidator` su `XML{}` (interfaccia già presente in `checker.go`)
-- [ ] **YAML strict** — tag custom / anchors in strict mode (JSON Schema già fatto)
+- [x] **XML + DTD** — `SchemaValidator` su `XML{}` (`xml_dtd.go`): valida elementi dichiarati, content model (membership, EMPTY, element-content vs #PCDATA), attributi `#REQUIRED`/`#FIXED`/enumerazioni, attributi non dichiarati. Limiti documentati: niente ordine/cardinalità del content model, niente espansione entità, niente ID/IDREF.
+  - **XSD / RelaxNG**: NON supportati di proposito. Non esiste un validatore puro-Go maturo; l'unica opzione production-grade (cgo + libxml2) romperebbe il binario statico self-contained e l'installer Windows (stessa motivazione documentata in `xml.go`).
+- [x] **YAML strict** — `--strict` rifiuta i tag custom (es. `!Point`, `!!python/object`) che non sono rappresentabili come dati YAML/JSON portabili; anchor/alias e tag standard restano validi. Vedi `yaml.go` (`yamlCustomTags`).

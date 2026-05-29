@@ -132,6 +132,13 @@ func run() int {
 // inspects the filename and content to guess the dialect. Returns "" when
 // the extension is unknown.
 func detectType(file string, data []byte) string {
+	// Dockerfiles are matched by name: they conventionally have no extension.
+	switch base := strings.ToLower(filepath.Base(file)); {
+	case base == "dockerfile", base == "containerfile",
+		strings.HasPrefix(base, "dockerfile."), strings.HasSuffix(base, ".dockerfile"):
+		return "dockerfile"
+	}
+
 	switch strings.ToLower(filepath.Ext(file)) {
 	case ".json":
 		return "json"
@@ -145,6 +152,10 @@ func detectType(file string, data []byte) string {
 		return "graphql"
 	case ".xml", ".xhtml":
 		return "xml"
+	case ".html", ".htm":
+		return "html"
+	case ".jq":
+		return "jq"
 	case ".yml", ".yaml":
 		return "yaml"
 	case ".toml":
@@ -285,6 +296,12 @@ func validatorFor(typ string) (checkers.Validator, error) {
 		return checkers.Oracle{}, nil
 	case "xml":
 		return checkers.XML{}, nil
+	case "html", "htm":
+		return checkers.HTML{}, nil
+	case "dockerfile":
+		return checkers.Dockerfile{}, nil
+	case "jq":
+		return checkers.JQ{}, nil
 	case "yaml":
 		return checkers.YAML{}, nil
 	case "toml":

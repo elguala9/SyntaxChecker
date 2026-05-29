@@ -26,6 +26,10 @@ if (-not (Test-Path $SamplesDir)) { Write-Error "Samples dir not found: $Samples
 # Maps a sample file to a checker --type, or $null when no checker exists yet.
 function Resolve-Type([System.IO.FileInfo]$file) {
   $name = $file.Name.ToLower()
+  # Extension-less Dockerfiles are matched by name.
+  if ($name -eq "dockerfile" -or $name -eq "containerfile" -or $name -like "dockerfile.*") {
+    return "dockerfile"
+  }
   switch ($file.Extension.ToLower()) {
     ".json" { return "json" }
     ".sql"  {
@@ -38,6 +42,10 @@ function Resolve-Type([System.IO.FileInfo]$file) {
     }
     ".xml"   { return "xml" }
     ".xhtml" { return "xml" }
+    ".html"  { return "html" }
+    ".htm"   { return "html" }
+    ".jq"    { return "jq" }
+    ".dockerfile" { return "dockerfile" }
     ".yaml"  { return "yaml" }
     ".yml"   { return "yaml" }
     ".toml"  { return "toml" }
@@ -51,6 +59,11 @@ function Resolve-Type([System.IO.FileInfo]$file) {
     ".markdown" { return "markdown" }
     ".env"        { return "env" }
     ".properties" { return "properties" }
+    ".json5"   { return "json5" }
+    ".jsonc"   { return "jsonc" }
+    ".proto"   { return "proto" }
+    ".graphql" { return "graphql" }
+    ".gql"     { return "graphql" }
     default { return $null }  # no checker for this extension yet
   }
 }
@@ -85,6 +98,20 @@ Get-ChildItem -Path $SamplesDir -Recurse -File | Sort-Object FullName | ForEach-
       return
     }
     $cliArgs += @("--schema", $schemaPath)
+  }
+
+  # DTD-validation samples live in test-samples/dtd: a document
+  # "<topic>.<variant>.xml" is validated against its sibling "<topic>.dtd".
+  if ($file.Directory.Name -eq "dtd") {
+    if ($file.Extension.ToLower() -ne ".xml") { return }  # the .dtd file itself
+    $topic   = ($file.Name -split '\.')[0]
+    $dtdPath = Join-Path $file.DirectoryName "$topic.dtd"
+    if (-not (Test-Path $dtdPath)) {
+      "  FAIL  {0,-45} (DTD '{1}.dtd' not found)" -f $rel, $topic
+      $fail++; $failures += $rel
+      return
+    }
+    $cliArgs += @("--schema", $dtdPath)
   }
 
   $output  = & $Exe @cliArgs
