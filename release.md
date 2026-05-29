@@ -4,6 +4,8 @@ Release publishing is automated by the `.github/workflows/release.yml` workflow,
 
 There are two ways to trigger it.
 
+> **Note on the remote name.** In this repository the GitHub remote is named `GitHub`, not the conventional `origin`. The commands below use `GitHub`; adjust if your clone uses a different remote name (check with `git remote -v`).
+
 ---
 
 ## Method 1 — Git tag (recommended)
@@ -35,7 +37,7 @@ git tag --sort=-v:refname | head
 ### 3. Push the tag
 
 ```bash
-git push origin v1.2.0
+git push GitHub v1.2.0
 ```
 
 > When the tag is pushed the `Release` workflow starts automatically. Track its progress on GitHub → **Actions** → run "Release".
@@ -83,14 +85,14 @@ If something goes wrong and you need to redo the tag:
 ```bash
 # delete the tag locally and on the remote
 git tag -d v1.2.0
-git push origin :refs/tags/v1.2.0
+git push GitHub :refs/tags/v1.2.0
 
 # delete the GitHub release (if it was created)
 gh release delete v1.2.0 --yes
 
 # recreate the tag as in Method 1
 git tag -a v1.2.0 -m "Release v1.2.0"
-git push origin v1.2.0
+git push GitHub v1.2.0
 ```
 
 > Avoid re-tagging versions already published to consumers: prefer releasing a new patch (`v1.2.1`).
