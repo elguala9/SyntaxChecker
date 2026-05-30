@@ -87,6 +87,36 @@ File: `~/.config/opencode/opencode.json` (Linux/macOS) or `%APPDATA%\opencode\op
 
 Restart OpenCode after editing the config.
 
+#### Installed via winget (portable)
+
+When SyntaxChecker is installed with `winget install Parresia.SyntaxChecker`
+(portable zip package), winget registers two PATH aliases — `syntax-checker`
+and `syntaxchecker-mcp` — so you no longer need absolute paths. In every config
+above, replace the absolute `...\dist\syntaxchecker-mcp.exe` with just the alias
+name, and drop `CHECKER_BIN` entirely (the server finds `syntax-checker` on
+`PATH` automatically).
+
+Claude Code, in one command:
+
+```powershell
+claude mcp add syntaxchecker syntaxchecker-mcp          # current project
+claude mcp add --scope user syntaxchecker syntaxchecker-mcp   # all projects
+```
+
+Or the equivalent JSON for any client:
+
+```json
+{
+  "mcpServers": {
+    "syntaxchecker": { "command": "syntaxchecker-mcp" }
+  }
+}
+```
+
+> Open a new shell after the winget install so the updated `PATH` is picked up.
+> The reference docs (`for-ia.md`, `for-agent.md`, `README.md`) ship inside the
+> same zip, next to the executables.
+
 ### 3. Verify the installation
 
 In the client, call the tool against a sample file:

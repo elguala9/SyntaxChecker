@@ -76,7 +76,7 @@ jobs:
           NAME="syntaxchecker-${{ steps.version.outputs.version }}-${{ matrix.goos }}-${{ matrix.goarch }}"
           mkdir -p "pkg-out/${NAME}"
           cp dist/syntax-checker${{ matrix.ext }} dist/syntaxchecker-mcp${{ matrix.ext }} "pkg-out/${NAME}/"
-          cp README.md "pkg-out/${NAME}/" 2>/dev/null || true
+          cp README.md for-ia.md for-agent.md "pkg-out/${NAME}/" 2>/dev/null || true
           cd pkg-out
           if [ "${{ matrix.archive }}" = "zip" ]; then
             7z a -tzip "${NAME}.zip" "${NAME}" >/dev/null
