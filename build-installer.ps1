@@ -1,7 +1,7 @@
 #requires -Version 5.1
 <#
 .SYNOPSIS
-  Builda syntax-checker.exe + syntaxchecker-mcp.exe e produce dist\SyntaxChecker-Setup.exe via Inno Setup.
+  Builds syntax-checker.exe + syntaxchecker-mcp.exe and produces dist\SyntaxChecker-Setup.exe via Inno Setup.
 
 .EXAMPLE
   .\build-installer.ps1
@@ -38,7 +38,7 @@ if (-not $Iscc) {
     }
 }
 if (-not $Iscc -or -not (Test-Path $Iscc)) {
-    throw "ISCC.exe non trovato. Installa Inno Setup 6 o passa -Iscc <path>."
+    throw "ISCC.exe not found. Install Inno Setup 6 or pass -Iscc <path>."
 }
 
 Write-Host "==> Version : $Version"
@@ -61,18 +61,18 @@ $ldMcp   = "-s -w"
 Write-Host "==> build syntax-checker.exe"
 Push-Location (Join-Path $root 'apps\checker')
 & go build -trimpath -ldflags $ldCheck -o (Join-Path $dist 'syntax-checker.exe') .
-if ($LASTEXITCODE -ne 0) { Pop-Location; throw "go build checker fallita" }
+if ($LASTEXITCODE -ne 0) { Pop-Location; throw "go build checker failed" }
 Pop-Location
 
 Write-Host "==> build syntaxchecker-mcp.exe"
 Push-Location (Join-Path $root 'apps\mcp-server')
 & go build -trimpath -ldflags $ldMcp -o (Join-Path $dist 'syntaxchecker-mcp.exe') .
-if ($LASTEXITCODE -ne 0) { Pop-Location; throw "go build mcp-server fallita" }
+if ($LASTEXITCODE -ne 0) { Pop-Location; throw "go build mcp-server failed" }
 Pop-Location
 
 Write-Host "==> compile installer.iss"
 & $Iscc "/DMyAppVersion=$Version" (Join-Path $root 'installer.iss')
-if ($LASTEXITCODE -ne 0) { throw "iscc fallito" }
+if ($LASTEXITCODE -ne 0) { throw "iscc failed" }
 
 Write-Host ""
 Write-Host "OK -> $(Join-Path $dist 'SyntaxChecker-Setup.exe')"
