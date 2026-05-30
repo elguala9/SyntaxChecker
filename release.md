@@ -85,7 +85,7 @@ If something goes wrong and you need to redo the tag:
 ```bash
 # delete the tag locally and on the remote
 git tag -d v1.2.0
-git push GitHub :refs/tags/v1.2.0
+git push GitHub :refs/tags/v1.2.0   # or: git push GitHub --delete v1.2.0
 
 # delete the GitHub release (if it was created)
 gh release delete v1.2.0 --yes
@@ -93,6 +93,13 @@ gh release delete v1.2.0 --yes
 # recreate the tag as in Method 1
 git tag -a v1.2.0 -m "Release v1.2.0"
 git push GitHub v1.2.0
+```
+
+Just deleting a tag (without recreating it):
+
+```bash
+git push GitHub --delete v1.2.0   # remote
+git tag -d v1.2.0                 # local
 ```
 
 > Avoid re-tagging versions already published to consumers: prefer releasing a new patch (`v1.2.1`).
