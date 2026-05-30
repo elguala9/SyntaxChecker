@@ -1,5 +1,5 @@
 ; SyntaxChecker - Inno Setup script
-; Build: iscc installer.iss  (oppure: mage installer)
+; Build: iscc installer.iss  (or: mage installer)
 ; Produces: dist\SyntaxChecker-Setup.exe
 
 #define MyAppName        "SyntaxChecker"
@@ -31,10 +31,9 @@ ChangesEnvironment=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl"
 
 [Tasks]
-Name: "addtopath"; Description: "Aggiungi la cartella di installazione al PATH utente"; GroupDescription: "Integrazione sistema:"
+Name: "addtopath"; Description: "Add the installation folder to the user PATH"; GroupDescription: "System integration:"
 
 [Files]
 Source: "dist\syntax-checker.exe"; DestDir: "{app}"; Flags: ignoreversion
@@ -43,9 +42,9 @@ Source: "for-ia.md";            DestDir: "{app}\docs"; Flags: ignoreversion
 Source: "for-agent.md";         DestDir: "{app}\docs"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\Documentazione (for-ia)";    Filename: "{app}\docs\for-ia.md"
-Name: "{group}\Documentazione (for-agent)"; Filename: "{app}\docs\for-agent.md"
-Name: "{group}\Disinstalla {#MyAppName}";   Filename: "{uninstallexe}"
+Name: "{group}\Documentation (for-ia)";    Filename: "{app}\docs\for-ia.md"
+Name: "{group}\Documentation (for-agent)"; Filename: "{app}\docs\for-agent.md"
+Name: "{group}\Uninstall {#MyAppName}";    Filename: "{uninstallexe}"
 
 [Code]
 const
