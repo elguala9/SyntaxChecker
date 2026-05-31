@@ -1,0 +1,17 @@
+PackageIdentifier: Parresia.SyntaxChecker
+PackageVersion: 0.1.1
+PackageLocale: en-US
+Publisher: Parresia
+PackageName: SyntaxChecker
+License: MIT
+LicenseUrl: https://github.com/elguala9/SyntaxChecker/blob/master/LICENSE
+ShortDescription: Multi-format syntax validator CLI and MCP server.
+PackageUrl: https://github.com/elguala9/SyntaxChecker
+Tags:
+  - syntax
+  - validator
+  - linter
+  - cli
+  - mcp
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
