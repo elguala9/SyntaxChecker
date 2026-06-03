@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SyntaxChecker — Validate 30+ formats with one tool</title>
+  <meta name="description" content="A fast, dependency-free multi-format syntax validator. One CLI and one MCP server for JSON, YAML, XML, TOML, 6 SQL dialects, Dockerfile/Compose, Go, TS/JS and more." />
+  <meta name="author" content="Luca Gualandi" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="SyntaxChecker — Validate 30+ formats with one tool" />
+  <meta property="og:description" content="A fast, dependency-free multi-format syntax validator. CLI + MCP server for JSON, YAML, XML, TOML, SQL, Dockerfile/Compose, Go, TS/JS and more." />
+  <meta property="og:url" content="https://elguala9.github.io/SyntaxChecker/" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>" />
+
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --bg-soft: #11151f;
+      --panel: #161b27;
+      --border: #232a3a;
+      --text: #e6e9f0;
+      --muted: #95a0b8;
+      --accent: #4f8cff;
+      --accent-2: #00d3a7;
+      --ok: #2ecc71;
+      --err: #ff5d6c;
+      --code-bg: #0d1117;
+      --radius: 14px;
+      --maxw: 1080px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 70% -10%, #16203a 0%, transparent 60%), var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, pre, .mono { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; }
+
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
+
+    /* Nav */
+    header.nav {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(10px);
+      background: rgba(11,14,20,.72);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; }
+    .brand .logo { font-size: 22px; }
+    .nav-links { display: flex; gap: 22px; align-items: center; }
+    .nav-links a { color: var(--muted); font-size: 15px; }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .nav-cta {
+      background: var(--accent); color: #fff; padding: 8px 16px; border-radius: 10px;
+      font-weight: 600; font-size: 14px;
+    }
+    .nav-cta:hover { background: #3f7bf0; text-decoration: none; }
+    @media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
+
+    /* Hero */
+    .hero { padding: 84px 0 56px; text-align: center; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--border); background: var(--bg-soft);
+      color: var(--muted); padding: 6px 14px; border-radius: 999px; font-size: 13px;
+      margin-bottom: 26px;
+    }
+    .badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+    .hero h1 { font-size: clamp(34px, 6vw, 58px); line-height: 1.07; margin: 0 0 18px; letter-spacing: -1px; }
+    .hero h1 .grad {
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p.lead { font-size: clamp(17px, 2.4vw, 21px); color: var(--muted); max-width: 720px; margin: 0 auto 34px; }
+    .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 13px 22px; border-radius: 12px; font-weight: 600; font-size: 15px;
+      border: 1px solid var(--border); transition: transform .08s ease, background .2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); text-decoration: none; }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #3f7bf0; }
+    .btn-ghost { background: var(--panel); color: var(--text); }
+    .btn-ghost:hover { border-color: var(--accent); }
+
+    /* Terminal mock */
+    .terminal {
+      max-width: 760px; margin: 48px auto 0; text-align: left;
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; box-shadow: 0 30px 80px -30px rgba(0,0,0,.7);
+    }
+    .term-bar { display: flex; gap: 8px; padding: 12px 16px; background: #0a0d13; border-bottom: 1px solid var(--border); }
+    .term-bar span { width: 12px; height: 12px; border-radius: 50%; }
+    .term-bar .r { background: #ff5f56; } .term-bar .y { background: #ffbd2e; } .term-bar .g { background: #27c93f; }
+    .term-body { padding: 20px 22px; font-size: 14.5px; line-height: 1.9; overflow-x: auto; }
+    .term-body .prompt { color: var(--accent-2); }
+    .term-body .cmd { color: var(--text); }
+    .term-body .flag { color: #c792ea; }
+    .term-body .ok { color: var(--ok); }
+    .term-body .err { color: var(--err); }
+    .term-body .dim { color: var(--muted); }
+
+    /* Sections */
+    section { padding: 72px 0; border-top: 1px solid var(--border); }
+    .sec-head { text-align: center; margin-bottom: 46px; }
+    .sec-head h2 { font-size: clamp(26px, 4vw, 36px); margin: 0 0 12px; letter-spacing: -.5px; }
+    .sec-head p { color: var(--muted); font-size: 17px; max-width: 620px; margin: 0 auto; }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    .stat { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 18px; text-align: center; }
+    .stat .num { font-size: 34px; font-weight: 800; background: linear-gradient(90deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat .lbl { color: var(--muted); font-size: 14px; margin-top: 4px; }
+    @media (max-width: 720px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+    /* Features */
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; }
+    .card .ico { font-size: 26px; margin-bottom: 12px; }
+    .card h3 { margin: 0 0 8px; font-size: 18px; }
+    .card p { margin: 0; color: var(--muted); font-size: 15px; }
+    @media (max-width: 860px) { .features { grid-template-columns: 1fr; } }
+
+    /* Formats */
+    .fmt-groups { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .fmt-group { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px 24px; }
+    .fmt-group h3 { margin: 0 0 14px; font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 5px 11px; font-size: 13.5px; }
+    .chip:hover { border-color: var(--accent); }
+    @media (max-width: 720px) { .fmt-groups { grid-template-columns: 1fr; } }
+
+    /* Install */
+    .install-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    @media (max-width: 720px) { .install-grid { grid-template-columns: 1fr; } }
+    .codeblock { position: relative; background: var(--code-bg); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin: 10px 0 0; }
+    .codeblock pre { margin: 0; overflow-x: auto; font-size: 14px; color: var(--text); }
+    .codeblock .lbl { color: var(--muted); font-size: 13px; margin-bottom: 8px; display: block; }
+    .copy-btn {
+      position: absolute; top: 12px; right: 12px; background: var(--bg-soft); border: 1px solid var(--border);
+      color: var(--muted); border-radius: 8px; padding: 5px 10px; font-size: 12px; cursor: pointer; transition: all .15s;
+    }
+    .copy-btn:hover { color: var(--text); border-color: var(--accent); }
+    .install-card h3 { margin: 0 0 4px; font-size: 18px; display: flex; align-items: center; gap: 9px; }
+    .install-card .note { color: var(--muted); font-size: 13.5px; margin: 8px 0 0; }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--border); padding: 46px 0; text-align: center; color: var(--muted); }
+    footer .flinks { display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    footer .flinks a { color: var(--muted); }
+    footer .flinks a:hover { color: var(--text); }
+    footer .small { font-size: 13.5px; }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <div class="brand"><span class="logo">🔍</span> SyntaxChecker</div>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#formats">Formats</a>
+        <a href="#install">Install</a>
+        <a class="nav-cta" href="https://github.com/elguala9/SyntaxChecker" target="_blank" rel="noopener">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" style="border-top: none;">
+      <div class="wrap">
+        <span class="badge"><span class="dot"></span> MIT licensed · pure-Go · zero dependencies</span>
+        <h1>One tool to validate<br><span class="grad">30+ config &amp; code formats</span></h1>
+        <p class="lead">
+          A stray comma in JSON. A duplicate key in TOML. An unbalanced XML tag.
+          SyntaxChecker answers one question fast — <em>is this file valid?</em> —
+          across dozens of formats, as a CLI <strong>and</strong> an MCP server for AI assistants.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#install">⬇️ Get started</a>
+          <a class="btn btn-ghost" href="https://github.com/elguala9/SyntaxChecker" target="_blank" rel="noopener">★ Star on GitHub</a>
+        </div>
+
+        <div class="terminal" aria-hidden="true">
+          <div class="term-bar"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+          <div class="term-body mono">
+            <div><span class="prompt">$</span> <span class="cmd">syntax-checker</span> <span class="flag">-f</span> config.yaml <span class="flag">--strict</span></div>
+            <div><span class="ok">✓ valid</span> <span class="dim">— config.yaml (yaml)</span></div>
+            <div style="height:10px"></div>
+            <div><span class="prompt">$</span> <span class="cmd">syntax-checker</span> <span class="flag">-f</span> query.sql <span class="flag">-t</span> sql:postgres</div>
+            <div><span class="err">✗ syntax error</span> <span class="dim">line 4:12 — syntax error at or near ")"</span></div>
+            <div style="height:10px"></div>
+            <div><span class="prompt">$</span> <span class="cmd">syntax-checker</span> <span class="flag">-f</span> data.json <span class="flag">--schema</span> schema.json</div>
+            <div><span class="err">✗ schema violation</span> <span class="dim">/items/0/price — expected number, got string</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section style="border-top: none; padding-top: 0;">
+      <div class="wrap">
+        <div class="stats">
+          <div class="stat"><div class="num">30+</div><div class="lbl">formats &amp; languages</div></div>
+          <div class="stat"><div class="num">6</div><div class="lbl">SQL dialects</div></div>
+          <div class="stat"><div class="num">&lt;20ms</div><div class="lbl">typical parse time</div></div>
+          <div class="stat"><div class="num">0</div><div class="lbl">runtime dependencies</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Built to be small, fast, and honest</h2>
+          <p>No runtime, no native libraries, no surprises — just a single static binary that does one thing well.</p>
+        </div>
+        <div class="features">
+          <div class="card">
+            <div class="ico">🦫</div>
+            <h3>Single static binary</h3>
+            <p>Pure-Go, <code>CGO_ENABLED=0</code>, <code>-trimpath</code>, stripped symbols. Drop it anywhere — no install, no dependencies, no "works on my machine."</p>
+          </div>
+          <div class="card">
+            <div class="ico">🧠</div>
+            <h3>Beyond well-formedness</h3>
+            <p>JSON Schema validation (drafts up to 2020-12) for JSON &amp; YAML, DTD validation for XML, duplicate-key detection, and a strict mode for the pedantic rules.</p>
+          </div>
+          <div class="card">
+            <div class="ico">🤖</div>
+            <h3>Speaks to AI assistants</h3>
+            <p>Ships as an MCP server exposing <code>check_syntax</code>, so Claude Code &amp; Claude Desktop can validate files mid-workflow. One-command plugin install.</p>
+          </div>
+          <div class="card">
+            <div class="ico">🎯</div>
+            <h3>One uniform contract</h3>
+            <p>30+ wildly different grammars report through the same result shape and exit codes (<code>0</code> valid, <code>1</code> errors, <code>2</code> internal) — scriptable everywhere.</p>
+          </div>
+          <div class="card">
+            <div class="ico">⚡</div>
+            <h3>Fast &amp; transparent</h3>
+            <p>Most parsers run in under 20&nbsp;ms. Where there's a trade-off (WASM Postgres, ANTLR for T-SQL/Oracle), it's documented — not hidden.</p>
+          </div>
+          <div class="card">
+            <div class="ico">🧪</div>
+            <h3>Tested like it matters</h3>
+            <p>A sample suite pairs valid files with deliberately broken ones. If a parser stops catching a real error, CI breaks. Releases are built &amp; published automatically.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FORMATS -->
+    <section id="formats">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Every format you keep tripping over</h2>
+          <p>Pass a file, optionally a <code>--type</code>, and get a yes/no with line &amp; column where the parser exposes it.</p>
+        </div>
+        <div class="fmt-groups">
+          <div class="fmt-group">
+            <h3>Config &amp; Data</h3>
+            <div class="chips">
+              <span class="chip">JSON</span><span class="chip">JSON5</span><span class="chip">JSONC</span>
+              <span class="chip">YAML</span><span class="chip">TOML</span><span class="chip">INI</span>
+              <span class="chip">XML</span><span class="chip">CSV</span><span class="chip">TSV</span>
+              <span class="chip">.env</span><span class="chip">Properties</span><span class="chip">HCL / Terraform</span>
+            </div>
+          </div>
+          <div class="fmt-group">
+            <h3>DevOps</h3>
+            <div class="chips">
+              <span class="chip">Dockerfile</span><span class="chip">Docker Compose</span>
+              <span class="chip">Podman Compose</span><span class="chip">Protobuf</span>
+              <span class="chip">Starlark / Bazel</span>
+            </div>
+          </div>
+          <div class="fmt-group">
+            <h3>Web &amp; Docs</h3>
+            <div class="chips">
+              <span class="chip">HTML</span><span class="chip">Markdown</span><span class="chip">GraphQL</span>
+            </div>
+          </div>
+          <div class="fmt-group">
+            <h3>Languages</h3>
+            <div class="chips">
+              <span class="chip">Go</span><span class="chip">TypeScript / TSX</span>
+              <span class="chip">JavaScript / JSX</span><span class="chip">Shell / Bash</span>
+              <span class="chip">Lua</span><span class="chip">jq</span>
+            </div>
+          </div>
+          <div class="fmt-group" style="grid-column: 1 / -1;">
+            <h3>SQL — 6 dialects</h3>
+            <div class="chips">
+              <span class="chip">MySQL</span><span class="chip">PostgreSQL</span><span class="chip">SQLite</span>
+              <span class="chip">SQL Server (T-SQL)</span><span class="chip">Oracle (PL/SQL)</span><span class="chip">ANSI</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTALL -->
+    <section id="install">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Install it your way</h2>
+          <p>Package manager, AI plugin, prebuilt binary, or build from source.</p>
+        </div>
+        <div class="install-grid">
+
+          <div class="install-card card">
+            <h3>🪟 winget (Windows)</h3>
+            <p class="note">Installs both binaries and registers PATH aliases.</p>
+            <div class="codeblock">
+              <button class="copy-btn" data-copy="winget install Parresia.SyntaxChecker">Copy</button>
+              <pre>winget install Parresia.SyntaxChecker</pre>
+            </div>
+          </div>
+
+          <div class="install-card card">
+            <h3>🤖 Claude Code plugin</h3>
+            <p class="note">Binaries auto-downloaded &amp; SHA-256 verified on first use.</p>
+            <div class="codeblock">
+              <button class="copy-btn" data-copy="/plugin marketplace add elguala9/SyntaxChecker&#10;/plugin install syntaxchecker">Copy</button>
+              <pre>/plugin marketplace add elguala9/SyntaxChecker
+/plugin install syntaxchecker</pre>
+            </div>
+          </div>
+
+          <div class="install-card card">
+            <h3>⬇️ Prebuilt binary</h3>
+            <p class="note">Linux x64 &amp; Windows x64 archives with checksums.</p>
+            <div class="codeblock">
+              <span class="lbl">Download the latest release</span>
+              <pre><a href="https://github.com/elguala9/SyntaxChecker/releases/latest" target="_blank" rel="noopener">github.com/elguala9/SyntaxChecker/releases/latest</a></pre>
+            </div>
+          </div>
+
+          <div class="install-card card">
+            <h3>🛠️ Build from source</h3>
+            <p class="note">Requires Go 1.22+ and <a href="https://magefile.org" target="_blank" rel="noopener">Mage</a>.</p>
+            <div class="codeblock">
+              <button class="copy-btn" data-copy="git clone https://github.com/elguala9/SyntaxChecker&#10;cd SyntaxChecker&#10;mage build">Copy</button>
+              <pre>git clone https://github.com/elguala9/SyntaxChecker
+cd SyntaxChecker
+mage build</pre>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- USAGE -->
+    <section id="usage">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Dead-simple CLI</h2>
+          <p>One flag set, every format. Auto-detection by extension, or force a type.</p>
+        </div>
+        <div class="codeblock" style="max-width: 760px; margin: 0 auto;">
+          <button class="copy-btn" data-copy="syntax-checker -f config.json&#10;syntax-checker -f query.sql -t sql:mysql&#10;syntax-checker -f data.json --strict -o json-pretty&#10;syntax-checker -f data.json --schema schema.json&#10;syntax-checker -f compose.yaml -t compose">Copy</button>
+          <pre><span class="mono">syntax-checker -f config.json
+syntax-checker -f query.sql -t sql:mysql
+syntax-checker -f data.json --strict -o json-pretty
+syntax-checker -f data.json --schema schema.json
+syntax-checker -f compose.yaml -t compose</span></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div class="flinks">
+        <a href="https://github.com/elguala9/SyntaxChecker" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/elguala9/SyntaxChecker/releases/latest" target="_blank" rel="noopener">Releases</a>
+        <a href="https://github.com/elguala9/SyntaxChecker#readme" target="_blank" rel="noopener">Docs</a>
+        <a href="https://github.com/elguala9/SyntaxChecker/blob/master/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <p class="small">Built with Go by Luca Gualandi · © 2026 Parresia · SyntaxChecker is MIT licensed</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.copy-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var text = btn.getAttribute('data-copy');
+        navigator.clipboard.writeText(text).then(function () {
+          var old = btn.textContent;
+          btn.textContent = 'Copied ✓';
+          setTimeout(function () { btn.textContent = old; }, 1400);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
