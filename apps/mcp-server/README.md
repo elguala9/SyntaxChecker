@@ -13,6 +13,7 @@ output as structured content.
   (or the file name for Dockerfiles).
   Values: `json`, `json5`, `jsonc`, `xml`, `html`, `yaml`, `toml`, `ini`, `csv`, `tsv`,
   `hcl`, `markdown`, `env`, `properties`, `proto`, `graphql`, `gql`, `dockerfile`,
+  `compose`, `docker-compose`, `podman-compose`,
   `jq`, `go`, `ts`, `tsx`, `js`, `jsx`, `lua`, `shell`, `starlark`,
   `sql:mysql`, `sql:postgres`, `sql:ansi`, `sql:sqlite`, `sql:mssql`, `sql:oracle`.
 - `schema` — optional; path to a JSON Schema (for `json`/`yaml`) or a DTD (for `xml`)
