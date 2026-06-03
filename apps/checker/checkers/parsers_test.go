@@ -274,7 +274,7 @@ func TestJQErrorPosition(t *testing.T) {
 // Strict mode is used so format-specific strict checks are exercised.
 func TestParserSamples(t *testing.T) {
 	root := filepath.Join("..", "..", "..", "test-samples")
-	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto", "graphql", "json5", "jsonc", "html", "dockerfile", "jq", "go", "ts", "js", "lua", "shell", "starlark"}
+	dirs := []string{"toml", "ini", "csv", "hcl", "markdown", "env", "properties", "proto", "graphql", "json5", "jsonc", "html", "dockerfile", "compose", "jq", "go", "ts", "js", "lua", "shell", "starlark"}
 
 	for _, d := range dirs {
 		entries, err := os.ReadDir(filepath.Join(root, d))

@@ -23,7 +23,7 @@ import (
 // CheckInput is the argument schema for the check_syntax tool.
 type CheckInput struct {
 	FilePath string `json:"file_path" jsonschema:"path of the file to check (absolute, or relative to the server's working directory)"`
-	Type     string `json:"type,omitempty" jsonschema:"forced type: json, json5, jsonc, xml, html, yaml, toml, ini, csv, tsv, hcl, markdown, env, properties, proto, graphql, dockerfile, jq, go, ts, tsx, js, jsx, lua, shell, starlark, sql:mysql, sql:postgres, sql:ansi, sql:sqlite, sql:mssql, sql:oracle; empty means auto-detect from the extension"`
+	Type     string `json:"type,omitempty" jsonschema:"forced type: json, json5, jsonc, xml, html, yaml, toml, ini, csv, tsv, hcl, markdown, env, properties, proto, graphql, dockerfile, compose, jq, go, ts, tsx, js, jsx, lua, shell, starlark, sql:mysql, sql:postgres, sql:ansi, sql:sqlite, sql:mssql, sql:oracle; empty means auto-detect from the extension"`
 	Schema   string `json:"schema,omitempty" jsonschema:"path of a JSON Schema (json, yaml) or a DTD (xml) to validate the document against"`
 	Strict   bool   `json:"strict,omitempty" jsonschema:"enable stricter checks where supported (e.g. JSON duplicate keys)"`
 }

@@ -1,0 +1,5 @@
+# "services" must be a mapping of service name -> definition, not a list.
+# The Compose schema rejects this structural error.
+services:
+  - name: web
+    image: nginx:1.27
