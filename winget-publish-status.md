@@ -1,78 +1,63 @@
-# winget publish — status & known issues (v0.1.1)
+# winget publish — status & known issues
 
-Working notes for publishing **Parresia.SyntaxChecker** to winget. Pick up from
-the **Resume here** section.
+Working notes for publishing **Parresia.SyntaxChecker** to winget.
 
 ## Where things stand
 
-- Release **`v0.1.1`** is published on GitHub and its zip now bundles the docs:
-  ```
-  syntaxchecker-v0.1.1-windows-amd64/
-  ├── for-agent.md
-  ├── for-ia.md
-  ├── README.md
-  ├── syntax-checker.exe
-  └── syntaxchecker-mcp.exe
-  ```
-  SHA256 of the zip: `B0FAABC2C8A3E7E7E1D9BEADAFDE136C5B24A3D52B08BA389CE7509B9792BB09`
-- The `release.yml` workflow was updated to copy `README.md for-ia.md for-agent.md`
-  into the archive (only future releases; `v0.1.0` does **not** have the docs).
-- `for-ia.md` got a new section "Installed via winget (portable)" documenting the
-  PATH-alias setup (`claude mcp add syntaxchecker syntaxchecker-mcp`).
-- Manual winget manifests were generated and **validated OK** under
-  `winget-manifests/0.1.1/` (3 files). Submission to winget-pkgs is **not done yet**.
+- **`0.1.1` is LIVE** on winget (`winget show Parresia.SyntaxChecker` returns it).
+  The first-time PR to `microsoft/winget-pkgs` was submitted and merged.
+- **`0.2.0`** GitHub release is published with the Windows asset and checksum:
+  - zip: `syntaxchecker-v0.2.0-windows-amd64.zip`
+  - SHA256: `0A7FBE31009E2D584BB7381E8AC10190040F9A0F86533DA6B6BD4FB2C8C661D6` (verified)
+  - The `0.2.0` release includes the Docker/Podman Compose checker (absent from `0.1.1`).
+- Reference manifests for `0.2.0` live under `winget-manifests/0.2.0/` and pass
+  `winget validate`. **The winget-pkgs update PR for `0.2.0` is not submitted yet.**
+
+## Shipping the 0.2.0 update — commands
+
+Because the package already exists on winget, use the non-interactive `update`
+flow (it does **not** hit the `new`-flow parse problem below). Needs a
+**PAT classic** with the `public_repo` scope.
+
+1. Dry run (no submit) to inspect the generated manifests:
+   ```powershell
+   wingetcreate update Parresia.SyntaxChecker `
+     --version 0.2.0 `
+     --urls "https://github.com/elguala9/SyntaxChecker/releases/download/v0.2.0/syntaxchecker-v0.2.0-windows-amd64.zip"
+   ```
+   Confirm the nested `RelativeFilePath` entries were bumped to
+   `syntaxchecker-v0.2.0-windows-amd64\...` (the folder name carries the version).
+
+2. Submit the PR:
+   ```powershell
+   wingetcreate update Parresia.SyntaxChecker `
+     --version 0.2.0 `
+     --urls "https://github.com/elguala9/SyntaxChecker/releases/download/v0.2.0/syntaxchecker-v0.2.0-windows-amd64.zip" `
+     --submit `
+     --token <PAT>
+   ```
+
+Alternatively, submit the validated reference manifests in this repo directly:
+```powershell
+wingetcreate submit --token <PAT> "winget-manifests\0.2.0"
+```
+
+After the Microsoft bots validate and merge, users get it with:
+```powershell
+winget upgrade Parresia.SyntaxChecker
+```
 
 ## Known issue — `wingetcreate new` fails on portable zips
 
-Command tried:
-```powershell
-wingetcreate new https://github.com/elguala9/SyntaxChecker/releases/download/v0.1.1/syntaxchecker-v0.1.1-windows-amd64.zip
-```
-After selecting the two `.exe` files it errors with:
-> Non è stato possibile analizzare il pacchetto da [...zip]
-> (Could not parse the package)
-
-**Cause:** `wingetcreate new` tries to analyze the selected files as *installers*
-to infer metadata. Our binaries are plain Go executables (built with
-`CGO_ENABLED=0`, no installer metadata), so the analysis step fails. This is a
-limitation of the interactive `new` flow with **zip + portable** packages, not a
-version bug — reproduced on WingetCreate **1.12.8** (latest).
-
-**Workaround (the one we adopted):** skip `wingetcreate new`, write the manifests
-by hand, then submit them with `wingetcreate submit` (which does **not** re-analyze
-the binaries). The validated manifests already live in `winget-manifests/0.1.1/`.
-
-Also tried first: launched `wingetcreate new` with the wrong URL (`v0.1.0`) by
-mistake — that zip lacks the docs. Always use the **`v0.1.1`** URL.
-
-## Resume here — submit the PR
-
-1. (Optional) local install test — run once from an **admin** shell:
-   ```powershell
-   winget settings --enable LocalManifestFiles
-   winget install --manifest "C:\Users\lgualandi\Documents\Development\Parresia\SyntaxChecker\winget-manifests\0.1.1"
-   ```
-   Then in a **new** shell: `syntax-checker --help` and `syntaxchecker-mcp --help`.
-
-2. Submit the PR to `microsoft/winget-pkgs` (needs a **PAT classic** with the
-   `public_repo` scope):
-   ```powershell
-   wingetcreate submit --token <PAT> "C:\Users\lgualandi\Documents\Development\Parresia\SyntaxChecker\winget-manifests\0.1.1"
-   ```
-   This forks/updates `microsoft/winget-pkgs`, pushes a branch, and opens the PR.
-   Microsoft bots validate (including the real SHA256 vs the download). Once merged:
-   ```powershell
-   winget install Parresia.SyntaxChecker
-   ```
+`wingetcreate new <zip-url>` errors with "Could not parse the package" because it
+tries to analyze the selected `.exe` files as installers; our binaries are plain
+Go executables (`CGO_ENABLED=0`, no installer metadata). This affects only the
+interactive `new` flow. Both `wingetcreate update` and `wingetcreate submit`
+(used above) avoid it, since they don't re-analyze the binaries.
 
 ## Notes / loose ends
 
-- `winget validate` only checks the manifest **schema**, not that the SHA256
-  matches the download. The bots verify the hash in the PR.
-- `winget.md` still shows `0.1.0` in its examples — update to `0.1.1` for
-  consistency (cosmetic).
-- Decide whether to commit `winget-manifests/` to the repo (handy reference for
-  future `wingetcreate update` runs) or keep it untracked.
-- Future updates (after a new release) should work with the non-interactive
-  `wingetcreate update` / `komac update` commands in `winget.md` — those don't hit
-  the `new`-flow parse problem.
+- `winget validate` checks manifest **schema** only, not the SHA256 vs download.
+  The bots verify the hash in the PR (and we verified it locally — MATCH).
+- Keeping `winget-manifests/` in the repo is handy as a reference for future
+  `wingetcreate update` runs.
