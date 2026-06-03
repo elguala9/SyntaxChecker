@@ -1,0 +1,19 @@
+{
+  "name": "syntaxchecker",
+  "owner": {
+    "name": "Luca Gualandi",
+    "url": "https://github.com/elguala9"
+  },
+  "metadata": {
+    "description": "Syntax validation tools for Claude Code.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "syntaxchecker",
+      "source": "./plugin",
+      "description": "Validate the syntax of many file formats and languages via the check_syntax MCP tool. Binaries are fetched on first use from GitHub Releases (no winget/dnf/apt required).",
+      "category": "developer-tools"
+    }
+  ]
+}
