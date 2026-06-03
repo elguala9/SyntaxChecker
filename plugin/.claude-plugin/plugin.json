@@ -1,0 +1,10 @@
+{
+  "name": "syntaxchecker",
+  "version": "0.2.0",
+  "description": "Validate the syntax of many file formats and languages (JSON, YAML, XML, TOML, SQL dialects, Dockerfile/Compose, Go, TS/JS, and more) through the check_syntax MCP tool. The required binaries are downloaded on first use from GitHub Releases.",
+  "author": { "name": "Luca Gualandi" },
+  "homepage": "https://github.com/elguala9/SyntaxChecker",
+  "repository": "https://github.com/elguala9/SyntaxChecker",
+  "license": "MIT",
+  "keywords": ["syntax", "linter", "validation", "mcp"]
+}

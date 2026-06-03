@@ -23,6 +23,7 @@ Multi-format syntax validator, shipped as a CLI (`syntax-checker`) and as an MCP
 | Protobuf | `proto` | `.proto`; non-permissive well-formedness (no import/type resolution) |
 | GraphQL | `graphql` / `gql` | `.graphql`, `.gql`; valid as either an SDL schema or an executable document |
 | Dockerfile | `dockerfile` | `Dockerfile`, `Containerfile`, `*.dockerfile`; structural parse + unknown-instruction/argument checks |
+| Compose | `compose` / `docker-compose` / `podman-compose` | `compose.yaml`/`.yml`, `compose.override.*`, `docker-compose.*`, `podman-compose.*`; YAML well-formedness + structural validation against the embedded Compose Specification schema (no interpolation/runtime semantics) |
 | jq | `jq` | `.jq`; jq program syntax (parse-only) |
 | Go | `go` / `golang` | `.go`; stdlib `go/parser` (parse-only, no type-check; file must start with a package clause) |
 | TypeScript | `ts` / `typescript`, `tsx` | `.ts`, `.tsx`; esbuild parser (parse-only, no type-check) |

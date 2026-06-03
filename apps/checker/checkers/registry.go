@@ -156,6 +156,22 @@ func init() {
 		Extensions:       []string{".dockerfile"},
 		New:              func() Validator { return Dockerfile{} },
 	})
+	// Compose files are YAML, so they are matched by exact filename / prefix only
+	// (never by the .yml/.yaml extension, which must stay on the generic "yaml"
+	// type to avoid validating arbitrary YAML against the Compose schema). The
+	// bare "compose." prefix is deliberately omitted — it would falsely claim
+	// files like compose.go/compose.js — while "docker-compose."/"podman-compose."
+	// are exclusive enough to match variants such as docker-compose.prod.yml.
+	Register(Registration{
+		Type:    "compose",
+		Aliases: []string{"docker-compose", "podman-compose"},
+		Filenames: []string{
+			"compose.yaml", "compose.yml",
+			"compose.override.yaml", "compose.override.yml",
+		},
+		FilenamePrefixes: []string{"docker-compose.", "podman-compose."},
+		New:              func() Validator { return Compose{} },
+	})
 
 	// SQL dialects. Each is a first-class type; the ".sql" extension maps to a
 	// family entry that sniffs the dialect from the filename and contents.
