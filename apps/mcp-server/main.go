@@ -34,7 +34,7 @@ var checkerBin = resolveCheckerBin()
 func main() {
 	server := mcp.NewServer(&mcp.Implementation{
 		Name:    "syntaxchecker",
-		Version: "0.1.0",
+		Version: "0.3.0",
 	}, nil)
 
 	mcp.AddTool(server, &mcp.Tool{
